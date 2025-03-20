@@ -56,54 +56,80 @@ export function Navbar() {
                     }
                   }}
                 >
-                  Customers
+                  Home
                 </Link>
-                <Link
-                  to="/dashboard"
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200 ${
-                    isActive('/dashboard') 
-                      ? darkMode 
-                        ? 'border-blue-400 text-white' 
-                        : 'border-blue-500 text-gray-900' 
-                      : darkMode
-                        ? 'border-transparent text-gray-300 hover:border-gray-600 hover:text-gray-200'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                  }`}
-                  onClick={(e) => {
-                    if (location.hash === '#/dashboard') {
-                      e.preventDefault();
-                    } else {
-                      e.preventDefault();
-                      navigate('/dashboard');
-                    }
-                  }}
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  to="/settings"
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200 ${
-                    isActive('/settings') 
-                      ? darkMode 
-                        ? 'border-blue-400 text-white' 
-                        : 'border-blue-500 text-gray-900' 
-                      : darkMode
-                        ? 'border-transparent text-gray-300 hover:border-gray-600 hover:text-gray-200'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                  }`}
-                  onClick={(e) => {
-                    if (location.hash === '#/settings') {
-                      console.log('Preventing navigation to current page');
-                      e.preventDefault();
-                    } else {
-                      console.log('Navigating to settings');
-                      e.preventDefault();
-                      navigate('/settings');
-                    }
-                  }}
-                >
-                  Settings
-                </Link>
+                {user && (
+                  <>
+                    <Link
+                      to="/customers"
+                      className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200 ${
+                        isActive('/customers') 
+                          ? darkMode 
+                            ? 'border-blue-400 text-white' 
+                            : 'border-blue-500 text-gray-900' 
+                          : darkMode
+                            ? 'border-transparent text-gray-300 hover:border-gray-600 hover:text-gray-200'
+                            : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                      }`}
+                      onClick={(e) => {
+                        if (location.hash === '#/customers') {
+                          e.preventDefault();
+                        } else {
+                          e.preventDefault();
+                          navigate('/customers');
+                        }
+                      }}
+                    >
+                      Customers
+                    </Link>
+                    <Link
+                      to="/dashboard"
+                      className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200 ${
+                        isActive('/dashboard') 
+                          ? darkMode 
+                            ? 'border-blue-400 text-white' 
+                            : 'border-blue-500 text-gray-900' 
+                          : darkMode
+                            ? 'border-transparent text-gray-300 hover:border-gray-600 hover:text-gray-200'
+                            : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                      }`}
+                      onClick={(e) => {
+                        if (location.hash === '#/dashboard') {
+                          e.preventDefault();
+                        } else {
+                          e.preventDefault();
+                          navigate('/dashboard');
+                        }
+                      }}
+                    >
+                      Dashboard
+                    </Link>
+                    <Link
+                      to="/settings"
+                      className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200 ${
+                        isActive('/settings') 
+                          ? darkMode 
+                            ? 'border-blue-400 text-white' 
+                            : 'border-blue-500 text-gray-900' 
+                          : darkMode
+                            ? 'border-transparent text-gray-300 hover:border-gray-600 hover:text-gray-200'
+                            : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                      }`}
+                      onClick={(e) => {
+                        if (location.hash === '#/settings') {
+                          console.log('Preventing navigation to current page');
+                          e.preventDefault();
+                        } else {
+                          console.log('Navigating to settings');
+                          e.preventDefault();
+                          navigate('/settings');
+                        }
+                      }}
+                    >
+                      Settings
+                    </Link>
+                  </>
+                )}
                 <Link
                   to="/about"
                   className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200 ${
@@ -178,16 +204,28 @@ export function Navbar() {
                   </button>
                 </div>
               ) : (
-                <Link
-                  to="/login"
-                  className={`inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md ${
-                    darkMode 
-                      ? 'text-white bg-blue-600 hover:bg-blue-700' 
-                      : 'text-white bg-blue-600 hover:bg-blue-700'
-                  } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200`}
-                >
-                  Sign in
-                </Link>
+                <div className="flex space-x-2">
+                  <Link
+                    to="/register"
+                    className={`inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md ${
+                      darkMode 
+                        ? 'text-white bg-blue-600 hover:bg-blue-700' 
+                        : 'text-white bg-blue-600 hover:bg-blue-700'
+                    } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200`}
+                  >
+                    Sign up
+                  </Link>
+                  <Link
+                    to="/login"
+                    className={`inline-flex items-center px-3 py-2 border text-sm leading-4 font-medium rounded-md ${
+                      darkMode 
+                        ? 'border-gray-700 text-gray-300 bg-gray-800 hover:text-white hover:bg-gray-700' 
+                        : 'border-gray-300 text-gray-700 bg-white hover:text-gray-900 hover:bg-gray-50'
+                    } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200`}
+                  >
+                    Log in
+                  </Link>
+                </div>
               )}
             </div>
             
@@ -283,56 +321,83 @@ export function Navbar() {
                 }
               }}
             >
-              Customers
+              Home
             </Link>
-            <Link
-              to="/dashboard"
-              className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors duration-200 ${
-                isActive('/dashboard') 
-                  ? darkMode
-                    ? 'bg-gray-900 border-blue-400 text-blue-400'
-                    : 'bg-blue-50 border-blue-500 text-blue-700'
-                  : darkMode
-                    ? 'border-transparent text-gray-300 hover:bg-gray-700 hover:border-gray-600 hover:text-gray-200'
-                    : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
-              }`}
-              onClick={(e) => {
-                setIsMenuOpen(false);
-                if (location.hash === '#/dashboard') {
-                  e.preventDefault();
-                } else {
-                  e.preventDefault();
-                  navigate('/dashboard');
-                }
-              }}
-            >
-              Dashboard
-            </Link>
-            <Link
-              to="/settings"
-              className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors duration-200 ${
-                isActive('/settings') 
-                  ? darkMode
-                    ? 'bg-gray-900 border-blue-400 text-blue-400'
-                    : 'bg-blue-50 border-blue-500 text-blue-700'
-                  : darkMode
-                    ? 'border-transparent text-gray-300 hover:bg-gray-700 hover:border-gray-600 hover:text-gray-200'
-                    : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
-              }`}
-              onClick={(e) => {
-                setIsMenuOpen(false);
-                if (location.hash === '#/settings') {
-                  console.log('Preventing navigation to current page (mobile)');
-                  e.preventDefault();
-                } else {
-                  console.log('Navigating to settings (mobile)');
-                  e.preventDefault();
-                  navigate('/settings');
-                }
-              }}
-            >
-              Settings
-            </Link>
+            {user && (
+              <>
+                <Link
+                  to="/customers"
+                  className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors duration-200 ${
+                    isActive('/customers') 
+                      ? darkMode
+                        ? 'bg-gray-900 border-blue-400 text-blue-400'
+                        : 'bg-blue-50 border-blue-500 text-blue-700'
+                      : darkMode
+                        ? 'border-transparent text-gray-300 hover:bg-gray-700 hover:border-gray-600 hover:text-gray-200'
+                        : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
+                  }`}
+                  onClick={(e) => {
+                    setIsMenuOpen(false);
+                    if (location.hash === '#/customers') {
+                      e.preventDefault();
+                    } else {
+                      e.preventDefault();
+                      navigate('/customers');
+                    }
+                  }}
+                >
+                  Customers
+                </Link>
+                <Link
+                  to="/dashboard"
+                  className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors duration-200 ${
+                    isActive('/dashboard') 
+                      ? darkMode
+                        ? 'bg-gray-900 border-blue-400 text-blue-400'
+                        : 'bg-blue-50 border-blue-500 text-blue-700'
+                      : darkMode
+                        ? 'border-transparent text-gray-300 hover:bg-gray-700 hover:border-gray-600 hover:text-gray-200'
+                        : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
+                  }`}
+                  onClick={(e) => {
+                    setIsMenuOpen(false);
+                    if (location.hash === '#/dashboard') {
+                      e.preventDefault();
+                    } else {
+                      e.preventDefault();
+                      navigate('/dashboard');
+                    }
+                  }}
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  to="/settings"
+                  className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors duration-200 ${
+                    isActive('/settings') 
+                      ? darkMode
+                        ? 'bg-gray-900 border-blue-400 text-blue-400'
+                        : 'bg-blue-50 border-blue-500 text-blue-700'
+                      : darkMode
+                        ? 'border-transparent text-gray-300 hover:bg-gray-700 hover:border-gray-600 hover:text-gray-200'
+                        : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
+                  }`}
+                  onClick={(e) => {
+                    setIsMenuOpen(false);
+                    if (location.hash === '#/settings') {
+                      console.log('Preventing navigation to current page (mobile)');
+                      e.preventDefault();
+                    } else {
+                      console.log('Navigating to settings (mobile)');
+                      e.preventDefault();
+                      navigate('/settings');
+                    }
+                  }}
+                >
+                  Settings
+                </Link>
+              </>
+            )}
             <Link
               to="/about"
               className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors duration-200 ${
@@ -396,17 +461,28 @@ export function Navbar() {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center px-4">
+              <div className="flex flex-col px-4 space-y-2">
                 <Link
-                  to="/login"
-                  className={`block px-4 py-2 text-base font-medium ${
-                    darkMode
-                      ? 'text-gray-300 hover:text-white hover:bg-gray-700'
-                      : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'
+                  to="/register"
+                  className={`block px-4 py-2 text-base font-medium text-center rounded-md ${
+                    darkMode 
+                      ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
                   } transition-colors duration-200`}
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Sign in
+                  Sign up
+                </Link>
+                <Link
+                  to="/login"
+                  className={`block px-4 py-2 text-base font-medium text-center rounded-md ${
+                    darkMode
+                      ? 'bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-700'
+                      : 'bg-gray-100 text-gray-700 hover:text-gray-900 hover:bg-gray-200'
+                  } transition-colors duration-200`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Log in
                 </Link>
               </div>
             )}

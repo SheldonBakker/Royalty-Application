@@ -1,21 +1,34 @@
 import { createClient } from '@supabase/supabase-js';
-import { config } from './config';
+import { getEnvConfig } from './config';
 
-// Use the config values instead of directly accessing environment variables
-const supabaseUrl = config.SUPABASE_URL;
-const supabaseAnonKey = config.SUPABASE_ANON_KEY;
+// Get config values dynamically at runtime rather than build time
+const getSupabaseConfig = () => {
+  const config = getEnvConfig();
+  return {
+    supabaseUrl: config.SUPABASE_URL,
+    supabaseAnonKey: config.SUPABASE_ANON_KEY
+  };
+};
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase credentials. Please set SUPABASE_URL and SUPABASE_ANON_KEY in your environment variables');
+// Create a function to get the Supabase client to ensure credentials are loaded at runtime
+export function getSupabaseClient() {
+  const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('Missing Supabase credentials. Please set SUPABASE_URL and SUPABASE_ANON_KEY in your environment variables');
+  }
+  
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true
+    }
+  });
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
-  }
-});
+// Export a client instance for backward compatibility, but this will now get credentials at runtime
+export const supabase = getSupabaseClient();
 
 export type Client = {
   id: string;

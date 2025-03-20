@@ -6,7 +6,7 @@ import { usePayment } from '../hooks/usePayment';
 import { toast } from 'react-hot-toast';
 import { useTheme } from '../hooks/useTheme';
 import { completePaymentTransaction, createPaymentTransaction } from '../lib/api';
-import { config as envConfig } from '../lib/config';
+import { getEnvConfig } from '../lib/config';
 
 // Simple type for Paystack response
 interface PaystackResponse {
@@ -15,15 +15,6 @@ interface PaystackResponse {
   [key: string]: string | number | boolean | Record<string, unknown> | null;
 }
 
-// Define our config type to match Paystack's requirements
-interface PaystackConfig {
-  reference: string;
-  email: string;
-  amount: number;
-  publicKey: string;
-  currency?: string;
-  channels?: string[];
-}
 
 // Update component props
 type PaymentProps = {
@@ -134,17 +125,20 @@ export function Payment({ onClose, onSuccess }: PaymentProps) {
     };
   }, []);
 
-  // Set up config for Paystack
-  const paystackConfig: PaystackConfig = {
-    reference: currentRef || `ref_${Date.now()}`,
-    email: user?.email || '',
-    amount: amount * 100, // Convert to kobo
-    publicKey: envConfig.PAYSTACK_PUBLIC_KEY,
-    currency: 'ZAR'
+  // Get Paystack config at runtime instead of build time
+  const getPaystackConfig = () => {
+    const config = getEnvConfig();
+    return {
+      reference: currentRef || `ref_${Date.now()}`,
+      email: user?.email || '',
+      amount: amount * 100, // Convert to kobo
+      publicKey: config.PAYSTACK_PUBLIC_KEY,
+      currency: 'ZAR'
+    };
   };
 
-  // Initialize Paystack hook
-  const initializePaystack = usePaystackPayment(paystackConfig);
+  // Initialize Paystack hook with dynamic config
+  const initializePaystack = usePaystackPayment(getPaystackConfig());
 
   // Update handleSuccess to use the handleOnClose function
   const handleSuccess = useCallback(async (reference: string) => {

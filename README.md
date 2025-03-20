@@ -15,23 +15,25 @@ A web application for coffee shops to manage customer loyalty programs, track co
 
 ## Technology Stack
 
-- **Frontend**: React with TypeScript, Tailwind CSS
+- **Frontend**: React 19 with TypeScript, Tailwind CSS
 - **Backend**: Supabase (Authentication, Database)
-- **Build Tool**: Vite
+- **Build Tool**: Vite 6
 - **Payment Processing**: Paystack
+- **Hosting**: Cloudflare Workers
 
 ## Prerequisites
 
-- Node.js (v14+)
+- Node.js (v18+)
 - npm or yarn
 - Supabase account with project set up
+- Cloudflare account (for deployment)
 
 ## Getting Started
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/coffee-loyalty.git
-cd coffee-loyalty
+git clone https://github.com/yourusername/royalty-application.git
+cd royalty-application
 ```
 
 2. Install dependencies:
@@ -79,17 +81,12 @@ VITE_PAYSTACK_PUBLIC_KEY=your-paystack-public-key
   - provider_reference (varchar)
   - metadata (jsonb)
 
-5. Run the SQL setup script to configure database functions and policies:
-```bash
-psql -U your_username -d your_database -a -f payment_system_setup.sql
-```
-
-6. Start the development server:
+5. Start the development server:
 ```bash
 npm run dev
 ```
 
-7. Open your browser and navigate to http://localhost:5173
+6. Open your browser and navigate to http://localhost:5173
 
 ## Usage
 
@@ -100,41 +97,30 @@ npm run dev
 5. **Process Redemptions**: Click the Redeem button when a customer has earned a free coffee
 6. **View Dashboard**: See statistics and recent activity
 
+## Available Scripts
+
+- `npm run dev`: Starts the development server
+- `npm run build`: Standard build for production
+- `npm run build:prod`: Optimized production build
+- `npm run lint`: Run ESLint to check code quality
+- `npm run preview`: Preview the production build locally
+- `npm run deploy`: Build and deploy to Cloudflare Workers
+- `npm run deploy:staging`: Build and deploy to Cloudflare Workers staging environment
+- `npm run clean`: Clean build artifacts
+- `npm run build:clean`: Clean and rebuild
+- `npm run analyze`: Analyze bundle size
+
 ## Production Deployment
 
-To build the application for production:
+To build and deploy the application to Cloudflare Workers:
 
 ```bash
-npm run build
+npm run deploy
 ```
 
-The build output will be in the `dist` directory, which you can deploy to your hosting provider of choice.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Development Setup
-
-1. Clone the repository
-2. Install dependencies:
-   ```
-   npm install
-   ```
-3. Create a `.env` file in the root directory with the following variables:
-   ```
-   VITE_SUPABASE_URL=your_supabase_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   VITE_PAYSTACK_PUBLIC_KEY=your_paystack_public_key
-   ```
-4. Start the development server:
-   ```
-   npm run dev
-   ```
+This will:
+1. Build the application with optimizations
+2. Deploy to Cloudflare Workers using Wrangler
 
 ## Deploying to Cloudflare Workers
 
@@ -176,18 +162,59 @@ wrangler secret put PAYSTACK_PUBLIC_KEY
 
 The CLI will prompt you to enter the values securely.
 
-### Deployment
+### Local Development with Secrets
 
-#### Deploy to Production
+For local development with Wrangler, create a `.dev.vars` file in the project root:
 
-```bash
-npm run deploy
+```
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+PAYSTACK_PUBLIC_KEY=your_paystack_public_key
 ```
 
-#### Deploy to Staging
+This file is automatically loaded by Wrangler when running `wrangler dev`, making your secrets available in the local development environment.
+
+**Important**: The `.dev.vars` file is included in `.gitignore` to prevent committing secrets to your repository.
+
+## Build Optimization
+
+The application uses an optimized build process to minimize bundle size and improve performance:
+
+### Production Build
+
+Use the optimized production build when deploying:
 
 ```bash
-npm run deploy:staging
+npm run build:prod
+```
+
+This build process:
+
+1. **Bundle Splitting**: Automatically splits vendor dependencies into separate chunks:
+   - React and related libraries (`vendor-react.js`)
+   - Supabase client (`vendor-supabase.js`)
+   - Other dependencies (`vendor.js`)
+   - Application code (`main.js`)
+
+2. **Aggressive Minification**:
+   - Removes comments and whitespace
+   - Performs multiple compression passes
+   - Removes console logs and debugger statements in production
+
+3. **Asset Optimization**:
+   - Adds content hashes to file names for optimal caching
+   - Optimizes CSS delivery
+
+4. **Environment Variable Handling**:
+   - Preserves runtime environment variable access for Cloudflare Workers
+   - Does not embed sensitive values at build time
+
+### Development Build
+
+For local development with full source maps and without minification:
+
+```bash
+npm run dev
 ```
 
 ## How Environment Variables Work
@@ -198,3 +225,45 @@ The application is configured to handle environment variables in two ways:
 2. In production (Cloudflare Workers), it accesses the environment variables directly from the global scope
 
 This is managed in the `src/lib/config.ts` file, which provides a consistent interface for accessing these variables throughout the application.
+
+## Troubleshooting
+
+### Environment Variables Not Loading from Cloudflare Secrets
+
+If your application is still using environment variables from your local `.env` file instead of Cloudflare Secrets, try the following steps:
+
+1. **Verify Secrets Configuration**: 
+   Make sure your secrets are properly set in Cloudflare:
+   ```bash
+   wrangler secret list
+   ```
+   You should see your secrets listed. If not, add them using the commands in the "Using Cloudflare Secrets" section.
+
+2. **Check .dev.vars File**:
+   For local development, ensure you have created a `.dev.vars` file with your environment variables.
+
+3. **Clear Build Cache**:
+   Sometimes Vite's build cache can cause issues with environment variable replacement:
+   ```bash
+   npm run clean
+   rm -rf node_modules/.vite
+   ```
+
+4. **Ensure Dynamic Configuration**:
+   Check that your application is using dynamic configuration loading as implemented in the `src/lib/config.ts` file:
+   - Don't directly reference `import.meta.env` in other files
+   - Always use the exported `getEnvConfig()` function to access environment variables
+
+5. **Rebuild and Deploy**:
+   ```bash
+   npm run build
+   wrangler deploy
+   ```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

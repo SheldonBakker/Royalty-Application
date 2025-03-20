@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loyalty Bean - Coffee Shop Loyalty Program</title>
+    <meta name="description" content="Manage your coffee shop loyalty program with Loyalty Bean. Track purchases, reward loyal customers, and grow your business.">
+    <!-- Environment variables runtime initialization -->
+    <script>
+      // Create global window.__ENV to store environment variables
+      window.__ENV = window.__ENV || {};
+      
+      // This allows us to check in our app whether env values are loaded
+      document.addEventListener('DOMContentLoaded', function() {
+        // For development environment
+        if (!window.__ENV.VITE_SUPABASE_URL && !window.CLOUDFLARE) {
+          console.log('Setting up runtime environment variables');
+          
+          // Fetch from import.meta.env during development (injected by Vite)
+          if (window.__VITE_ENV_INJECTED__) {
+            window.__ENV.VITE_SUPABASE_URL = window.__VITE_ENV_INJECTED__.VITE_SUPABASE_URL || '';
+            window.__ENV.VITE_SUPABASE_ANON_KEY = window.__VITE_ENV_INJECTED__.VITE_SUPABASE_ANON_KEY || '';
+            window.__ENV.VITE_PAYSTACK_PUBLIC_KEY = window.__VITE_ENV_INJECTED__.VITE_PAYSTACK_PUBLIC_KEY || '';
+          }
+          
+          console.log('Environment check (from runtime script):', {
+            supabaseUrlSet: !!window.__ENV.VITE_SUPABASE_URL,
+            supabaseKeySet: !!window.__ENV.VITE_SUPABASE_ANON_KEY
+          });
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html> 

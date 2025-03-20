@@ -3,6 +3,7 @@ import { HashRouter } from 'react-router-dom'
 import { Component, ErrorInfo, ReactNode } from 'react'
 import './index.css'
 import App from './App.tsx'
+import { setEnvSecrets } from './lib/config'
 
 // Error boundary to catch and handle asynchronous errors
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
@@ -117,4 +118,20 @@ if (import.meta.hot) {
   import.meta.hot.accept('./App.tsx', () => {
     renderApp()
   })
+}
+
+interface CloudflareEnv {
+  env: {
+    SUPABASE_URL: string;
+    SUPABASE_ANON_KEY: string;
+    PAYSTACK_PUBLIC_KEY: string;
+  };
+}
+
+// Check if running in Cloudflare Workers environment and set env secrets
+if (typeof window !== 'undefined' && 'CLOUDFLARE' in window) {
+  const selfWithEnv = self as unknown as CloudflareEnv;
+  if (selfWithEnv.env) {
+    setEnvSecrets(selfWithEnv.env);
+  }
 }
