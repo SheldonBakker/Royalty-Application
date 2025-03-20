@@ -8,12 +8,6 @@ import { useTheme } from '../hooks/useTheme';
 import { completePaymentTransaction, createPaymentTransaction } from '../lib/api';
 import { getEnvConfig } from '../lib/config';
 
-// Simple type for Paystack response
-interface PaystackResponse {
-  reference: string;
-  // We're using Record<string, unknown> instead of any for better type safety
-  [key: string]: string | number | boolean | Record<string, unknown> | null;
-}
 
 // Update component props
 type PaymentProps = {
@@ -53,6 +47,33 @@ const DebugInfo = ({ creditBalance, hasPaid }: { creditBalance: number, hasPaid:
     </div>
   );
 };
+
+// Define proper types for Paystack
+interface PaystackProps {
+  reference: string;
+  email: string;
+  amount: number;
+  publicKey: string;
+  currency: 'ZAR' | 'NGN' | 'USD' | 'GHS' | 'KES' | 'XOF';
+  [key: string]: unknown;
+}
+
+// Define proper types for Paystack responses
+interface PaystackResponse {
+  reference: string;
+  message: string;
+  status: string;
+  trans: string;
+  transaction: string;
+  trxref: string;
+  [key: string]: string | number | boolean | Record<string, unknown> | null;
+}
+
+// Define a type for the Paystack initialization function
+type PaystackInitFn = (
+  callback: (response: PaystackResponse) => void,
+  onClose: () => void
+) => void;
 
 export function Payment({ onClose, onSuccess }: PaymentProps) {
   const navigate = useNavigate();
@@ -125,20 +146,20 @@ export function Payment({ onClose, onSuccess }: PaymentProps) {
   }, []);
 
   // Get Paystack config at runtime instead of build time
-  const getPaystackConfig = () => {
+  const getPaystackConfig = (): PaystackProps => {
     const config = getEnvConfig();
+    const currency = 'ZAR' as const; // Use const assertion
     return {
       reference: currentRef || `ref_${Date.now()}`,
       email: user?.email || '',
       amount: amount * 100, // Convert to kobo
       publicKey: config.PAYSTACK_PUBLIC_KEY,
-      // Cast currency to any to bypass type checking
-      currency: 'ZAR' 
+      currency
     };
   };
 
-  // Initialize Paystack hook with dynamic config - cast config to any to bypass type checking
-  const initializePaystack = usePaystackPayment(getPaystackConfig() as any);
+  // Initialize Paystack hook with dynamic config
+  const initializePaystack = usePaystackPayment(getPaystackConfig());
 
   // Update handleSuccess to use the handleOnClose function
   const handleSuccess = useCallback(async (reference: string) => {
@@ -278,8 +299,7 @@ export function Payment({ onClose, onSuccess }: PaymentProps) {
             const safeInitializePayment = () => {
               try {
                 // Use the function according to the library's API
-                // Cast callbacks to any to bypass type checking
-                const onSuccess = (response: any) => {
+                const onSuccess = (response: PaystackResponse) => {
                   try {
                     // Ensure we safely handle the response
                     if (response && response.reference) {
@@ -314,8 +334,7 @@ export function Payment({ onClose, onSuccess }: PaymentProps) {
                 };
 
                 // Call the function directly with the correct parameters
-                // Cast it as any to bypass type checking
-                (initializePaystack as any)(onSuccess, onClose);
+                (initializePaystack as PaystackInitFn)(onSuccess, onClose);
               } catch (err) {
                 console.error('Error initializing payment:', err);
                 if (isMounted.current) {

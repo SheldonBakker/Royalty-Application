@@ -7,7 +7,7 @@ import type { Settings } from '../../lib/supabase';
 import { useTheme } from '../../hooks/useTheme';
 import { Payment } from '../Payment';
 import { supabase } from '../../lib/supabase';
-import { MFASetup } from '../../components/MFASetup';
+import MFASetup from '../../components/MFASetup';
 import { Factor } from '@supabase/supabase-js';
 
 export function Settings() {
@@ -261,31 +261,6 @@ export function Settings() {
     });
   }, [lastResetDate]);
 
-  // Memoize the payment modal close handler
-  const handlePaymentClose = useCallback(async () => {
-    setShowPaymentModal(false);
-    closePaymentModal(); // Also close in context
-    // Make sure we're in loading state while refreshing payment
-    setSaving(true);
-    
-    try {
-      const oldBalance = creditBalance;
-      await refreshPaymentStatus();
-      
-      // Create a timeout to allow state to update, then check if balance increased
-      setTimeout(() => {
-        if (creditBalance > oldBalance) {
-          setSuccessMessage('Payment successful! Your account has been credited.');
-        }
-      }, 1000);
-      
-    } catch (err) {
-      console.error('Error refreshing payment status:', err);
-    } finally {
-      setSaving(false);
-    }
-  }, [refreshPaymentStatus, closePaymentModal, creditBalance]);
-
   // Memoize the error toast
   const errorToast = useMemo(() => {
     if (!error) return null;
@@ -323,21 +298,6 @@ export function Settings() {
   }, [successMessage, darkMode]);
   
   // Memoize the payment form
-  const paymentForm = useMemo(() => {
-    if (!showPaymentModal || isLoading) return null;
-    
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <Payment 
-          onClose={handlePaymentClose} 
-          onSuccess={() => {
-            // Set success message directly when Payment signals success
-            setSuccessMessage('Payment successful! Your account has been credited.');
-          }}
-        />
-      </div>
-    );
-  }, [showPaymentModal, isLoading, handlePaymentClose]);
 
   // Password change handler
   const handlePasswordChange = useCallback(async (e: FormEvent) => {
@@ -586,18 +546,6 @@ export function Settings() {
   }, [showPasswordModal, darkMode, passwordError, passwordSuccess, currentPassword, newPassword, confirmPassword, passwordSaving, user, handlePasswordChange, handlePasswordModalClose]);
 
   // Add this to your component, right after the passwordModal constant
-  const mfaSetupModal = useMemo(() => {
-    if (!showMFASetupModal) return null;
-    
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <MFASetup 
-          onEnrolled={handleMFAEnrolled} 
-          onCancel={() => setShowMFASetupModal(false)} 
-        />
-      </div>
-    );
-  }, [showMFASetupModal, handleMFAEnrolled]);
 
   // Add this to the memoized modals section - after mfaSetupModal
   const disableMFAModal = useMemo(() => {
@@ -728,294 +676,352 @@ export function Settings() {
       {errorToast}
       {successToast}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700' : 'bg-gradient-to-br from-white to-gray-50 border-gray-100'} rounded-xl shadow-lg border p-6 hover:shadow-xl transition-all duration-200`}>
-          <div className="flex items-center mb-5">
-            <svg className={`h-8 w-8 mr-3 ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-            </svg>
-            <h2 className={`text-2xl font-bold ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>Loyalty Program Settings</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+        {/* Loyalty Program Settings Card */}
+        <div className={`relative overflow-hidden rounded-2xl shadow-xl border transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl ${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700' : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'} ${loading ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`} style={{ transitionDelay: '200ms' }}>
+          <div className={`absolute top-0 right-0 w-32 h-32 -mt-8 -mr-8 rounded-full ${darkMode ? 'bg-indigo-900/20' : 'bg-indigo-100/50'} blur-2xl`}></div>
+          <div className="p-8 relative z-10">
+            <div className="flex items-center mb-6">
+              <div className={`w-12 h-12 flex items-center justify-center rounded-xl mr-4 ${darkMode ? 'bg-indigo-900/30 text-indigo-400' : 'bg-indigo-100 text-indigo-600'}`}>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+              </div>
+              <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Loyalty Program Settings</h2>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="max-w-md">
+              <div className="mb-5">
+                <label htmlFor="redemptionThreshold" className={`block ${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium mb-2`}>
+                  Units required for redemption
+                </label>
+                <input
+                  type="number"
+                  id="redemptionThreshold"
+                  min="1"
+                  value={redemptionThreshold}
+                  onChange={(e) => setRedemptionThreshold(parseInt(e.target.value))}
+                  className={`w-full p-3 border rounded-lg shadow-sm ${
+                    darkMode 
+                      ? 'bg-gray-800 border-gray-700 text-gray-200 focus:ring-blue-500 focus:border-blue-500' 
+                      : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
+                  }`}
+                />
+                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-2 ml-1`}>
+                  Number of units a customer needs to purchase before earning a free unit.
+                </p>
+              </div>
+              
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-lg font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative overflow-hidden group"
+              >
+                <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></span>
+                <svg className="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Save Settings
+              </button>
+            </form>
           </div>
-          
-          <form onSubmit={handleSubmit} className="max-w-md">
-            <div className="mb-4">
-              <label htmlFor="redemptionThreshold" className={`block ${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium mb-2`}>
-                Units required for redemption
-              </label>
-              <input
-                type="number"
-                id="redemptionThreshold"
-                min="1"
-                value={redemptionThreshold}
-                onChange={(e) => setRedemptionThreshold(parseInt(e.target.value))}
-                className={`w-full p-3 border rounded-lg shadow-sm ${
-                  darkMode 
-                    ? 'bg-gray-800 border-gray-700 text-gray-200 focus:ring-blue-500 focus:border-blue-500' 
-                    : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
-                }`}
-              />
-              <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-2 ml-1`}>
-                Number of units a customer needs to purchase before earning a free unit.
+        </div>
+
+        {/* Unit Statistics Card */}
+        <div className={`relative overflow-hidden rounded-2xl shadow-xl border transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl ${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700' : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'} ${loading ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`} style={{ transitionDelay: '250ms' }}>
+          <div className={`absolute top-0 right-0 w-32 h-32 -mt-8 -mr-8 rounded-full ${darkMode ? 'bg-orange-900/20' : 'bg-orange-100/50'} blur-2xl`}></div>
+          <div className="p-8 relative z-10">
+            <div className="flex items-center mb-6">
+              <div className={`w-12 h-12 flex items-center justify-center rounded-xl mr-4 ${darkMode ? 'bg-orange-900/30 text-orange-400' : 'bg-orange-100 text-orange-600'}`}>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+              </div>
+              <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Unit Statistics</h2>
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <span className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>Monthly Units Sold:</span>
+                <div className={`text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${darkMode ? 'from-orange-400 to-amber-400' : 'from-orange-600 to-amber-600'}`}>
+                  {totalCoffees}
+                </div>
+              </div>
+              <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm mb-6`}>
+                Number of units sold in the current month.
               </p>
+              
+              <div className={`p-5 rounded-lg ${darkMode ? 'bg-blue-900/20 border border-blue-800/30' : 'bg-blue-50 border border-blue-100'}`}>
+                <div className="flex items-center mb-3">
+                  <div className={`w-8 h-8 flex items-center justify-center rounded-lg mr-3 ${darkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-600'}`}>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                  </div>
+                  <p className={`${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <span className="font-medium">Last Reset:</span> {getFormattedResetDate()}
+                  </p>
+                </div>
+                <div className="flex items-center mb-3">
+                  <div className={`w-8 h-8 flex items-center justify-center rounded-lg mr-3 ${darkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-600'}`}>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                  </div>
+                  <p className={`${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <span className="font-medium">Next Reset:</span> {getNextResetDate()}
+                  </p>
+                </div>
+                <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} ml-11`}>
+                  Counter automatically resets at the beginning of each month.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Account Credit Card */}
+        <div className={`relative overflow-hidden rounded-2xl shadow-xl border transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl ${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700' : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'} ${loading ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`} style={{ transitionDelay: '300ms' }}>
+          <div className={`absolute top-0 right-0 w-32 h-32 -mt-8 -mr-8 rounded-full ${darkMode ? 'bg-blue-900/20' : 'bg-blue-100/50'} blur-2xl`}></div>
+          <div className="p-8 relative z-10">
+            <div className="flex items-center mb-6">
+              <div className={`w-12 h-12 flex items-center justify-center rounded-xl mr-4 ${darkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-600'}`}>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 4h2a2 2 0 012 2v14a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2h2"></path>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 2H10a2 2 0 00-2 2v2a2 2 0 002 2h4a2 2 0 002-2V4a2 2 0 00-2-2zM12 14v4"></path>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 14v1a4 4 0 01-8 0v-1"></path>
+                </svg>
+              </div>
+              <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Account Credit</h2>
+            </div>
+            
+            {/* Credit balance display and account status */}
+            <div className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
+              <p className="mb-4">You are charged R2.7 per transaction. Load credits to continue using the service.</p>
+              
+              <div className={`flex items-center mb-6 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                <span className="text-3xl font-bold">R{creditBalance.toFixed(2)}</span>
+                <span className={`ml-2 text-sm ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>current balance</span>
+              </div>
+              
+              <div className={`p-4 rounded-lg mb-5 ${darkMode ? 'bg-blue-900/10 border border-blue-800/20' : 'bg-blue-50 border border-blue-100'}`}>
+                <div className="flex items-start">
+                  <div className={`flex-shrink-0 w-5 h-5 mt-0.5 ${darkMode ? 'text-' + (isPaid ? 'green' : 'amber') + '-400' : 'text-' + (isPaid ? 'green' : 'amber') + '-600'}`}>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      {isPaid ? (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      ) : (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      )}
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className={`font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      {isPaid ? 'Your account has full access' : 'Some features require credit'}
+                    </p>
+                    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      {isPaid ? 'You have full access to all features.' : 'You need at least R200 credit to access all features.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap gap-3 mb-6">
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${darkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-700'}`}>
+                  R2.7 per transaction
+                </span>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${darkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-700'}`}>
+                  Secure payments
+                </span>
+              </div>
             </div>
             
             <button
-              type="submit"
-              disabled={isLoading}
-              className="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-lg font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              onClick={openPaymentModal}
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-lg font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative overflow-hidden group"
+            >
+              <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></span>
+              <svg className="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              Load Credits
+            </button>
+            
+            <button
+              onClick={refreshPaymentStatus}
+              className={`mt-3 inline-flex items-center px-4 py-2 border rounded-lg font-medium shadow-sm text-sm ${
+                darkMode 
+                  ? 'border-gray-700 bg-gray-800 text-gray-300 hover:bg-gray-700' 
+                  : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
             >
               <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
               </svg>
-              Save Settings
+              Refresh Status
             </button>
-          </form>
-        </div>
-
-        <div className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700' : 'bg-gradient-to-br from-white to-gray-50 border-gray-100'} rounded-xl shadow-lg border p-6 hover:shadow-xl transition-all duration-200`}>
-          <div className="flex items-center mb-5">
-            <svg className={`h-8 w-8 mr-3 ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 4h2a2 2 0 012 2v14a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2h2"></path>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 2H10a2 2 0 00-2 2v2a2 2 0 002 2h4a2 2 0 002-2V4a2 2 0 00-2-2zM12 14v4"></path>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 14v1a4 4 0 01-8 0v-1"></path>
-            </svg>
-            <h2 className={`text-2xl font-bold ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>Unit Statistics</h2>
-          </div>
-          
-          <div>
-            <div className="flex justify-between items-center mb-3">
-              <span className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>Monthly Units Sold:</span>
-              <span className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-orange-700`}>{totalCoffees}</span>
-            </div>
-            <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm mb-3`}>
-              Number of units sold in the current month.
-            </p>
-            
-            <div className={`${darkMode ? 'bg-blue-900/20 border-blue-800 text-blue-300' : 'bg-blue-50 border-blue-100'} p-4 rounded-lg border shadow-sm`}>
-              <div className="flex items-center mb-2">
-                <svg className={`h-5 w-5 mr-2 ${darkMode ? 'text-blue-300' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                </svg>
-                <p className={`${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  <span className={`${darkMode ? 'font-medium' : ''}`}>Last Reset:</span> {getFormattedResetDate()}
-                </p>
-              </div>
-              <div className="flex items-center mb-2">
-                <svg className={`h-5 w-5 mr-2 ${darkMode ? 'text-blue-300' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <p className={`${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  <span className={`${darkMode ? 'font-medium' : ''}`}>Next Reset:</span> {getNextResetDate()}
-                </p>
-              </div>
-              <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-xs mt-2 ml-7`}>Counter automatically resets at the beginning of each month.</p>
-            </div>
           </div>
         </div>
+      </div>
 
-        <div className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700' : 'bg-gradient-to-br from-white to-gray-50 border-gray-100'} rounded-xl shadow-lg border p-6 hover:shadow-xl transition-all duration-200`}>
-          <div className="flex items-center mb-5">
-            <svg className={`h-8 w-8 mr-3 ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 4h2a2 2 0 012 2v14a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2h2"></path>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 2H10a2 2 0 00-2 2v2a2 2 0 002 2h4a2 2 0 002-2V4a2 2 0 00-2-2zM12 14v4"></path>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 14v1a4 4 0 01-8 0v-1"></path>
-            </svg>
-            <h2 className={`text-2xl font-bold ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>Account Credit</h2>
-          </div>
-          
-          <div>
-            <div className="flex justify-between items-center mb-3">
-              <span className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>Current Balance:</span>
-              <span className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-700`}>
-                R{typeof creditBalance === 'number' ? creditBalance.toFixed(2) : 'Loading...'}
-              </span>
+      {/* Security and WhatsApp Integration - Row 2 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        {/* Security Settings Card */}
+        <div className={`relative overflow-hidden rounded-2xl shadow-xl border transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl ${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700' : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'}`}>
+          <div className={`absolute top-0 right-0 w-32 h-32 -mt-8 -mr-8 rounded-full ${darkMode ? 'bg-purple-900/20' : 'bg-purple-100/50'} blur-2xl`}></div>
+          <div className="p-8 relative z-10">
+            <div className="flex items-center mb-6">
+              <div className={`w-12 h-12 flex items-center justify-center rounded-xl mr-4 ${darkMode ? 'bg-purple-900/30 text-purple-400' : 'bg-purple-100 text-purple-600'}`}>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                </svg>
+              </div>
+              <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Security Settings</h2>
             </div>
             
-            <div className={`${darkMode ? 'bg-green-900/20 border-green-800' : 'bg-green-50 border-green-100'} p-4 rounded-lg border shadow-sm mb-4`}>
-              <div className="flex items-start">
-                <svg className={`h-5 w-5 mr-2 mt-0.5 ${darkMode ? 'text-green-600' : 'text-green-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  {isPaid ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  )}
+            <div className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-5`}>
+              <p className="mb-2">Manage your account security settings.</p>
+              {user?.email && (
+                <p className="font-medium mb-3">
+                  Email: <span className={darkMode ? 'text-purple-400' : 'text-purple-600'}>{user.email}</span>
+                </p>
+              )}
+            </div>
+
+            {/* Two-Factor Authentication Status */}
+            <div className="mb-5">
+              <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>Two-Factor Authentication</h3>
+              
+              {mfaFactors.length > 0 ? (
+                <div className="flex items-center mb-4">
+                  <div className={`flex h-5 w-5 items-center justify-center rounded-full ${darkMode ? 'bg-green-900/30' : 'bg-green-100'} mr-2`}>
+                    <svg className={`h-3 w-3 ${darkMode ? 'text-green-400' : 'text-green-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </div>
+                  <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>2FA is enabled</span>
+                </div>
+              ) : (
+                <div className="flex items-center mb-4">
+                  <div className={`flex h-5 w-5 items-center justify-center rounded-full ${darkMode ? 'bg-red-900/30' : 'bg-red-100'} mr-2`}>
+                    <svg className={`h-3 w-3 ${darkMode ? 'text-red-400' : 'text-red-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </div>
+                  <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>2FA is not enabled</span>
+                </div>
+              )}
+
+              {mfaFactors.length > 0 ? (
+                <button
+                  onClick={handleDisableMFA}
+                  className={`w-full inline-flex justify-center items-center px-4 py-2 border rounded-lg text-sm font-medium shadow-sm ${
+                    darkMode 
+                      ? 'border-red-800 bg-red-900/20 text-red-400 hover:bg-red-900/40' 
+                      : 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100'
+                  } transition-colors duration-200`}
+                >
+                  <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                  </svg>
+                  Disable 2FA
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowMFASetupModal(true)}
+                  className="w-full inline-flex justify-center items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-700 text-white rounded-lg text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden group"
+                >
+                  <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></span>
+                  <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                  </svg>
+                  Enable 2FA
+                </button>
+              )}
+            </div>
+
+            <button
+              onClick={() => setShowPasswordModal(true)}
+              className="w-full inline-flex justify-center items-center px-4 py-2 border rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-all duration-200 mb-2 group relative overflow-hidden"
+              style={{
+                background: darkMode ? 'linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%)' : 'linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%)',
+                borderColor: darkMode ? 'rgba(124, 58, 237, 0.3)' : 'rgba(124, 58, 237, 0.2)',
+                color: darkMode ? 'rgb(196, 181, 253)' : 'rgb(124, 58, 237)'
+              }}
+            >
+              <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/0 via-white/5 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></span>
+              <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+              </svg>
+              Change Password
+            </button>
+          </div>
+        </div>
+
+        {/* WhatsApp Integration Card */}
+        <div className={`relative overflow-hidden rounded-2xl shadow-xl border transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl ${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700' : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'}`}>
+          <div className={`absolute top-0 right-0 w-32 h-32 -mt-8 -mr-8 rounded-full ${darkMode ? 'bg-green-900/20' : 'bg-green-100/50'} blur-2xl`}></div>
+          <div className={`absolute bottom-0 left-0 w-32 h-32 -mb-8 -ml-8 rounded-full ${darkMode ? 'bg-emerald-900/20' : 'bg-emerald-100/50'} blur-2xl`}></div>
+          <div className="p-8 relative z-10">
+            <div className="flex items-center mb-5">
+              <div className={`w-12 h-12 flex items-center justify-center rounded-xl mr-4 ${darkMode ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-600'}`}>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                 </svg>
-                <div>
-                  <p className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium mb-1`}>
-                    {isPaid 
-                      ? 'Your account has full access' 
-                      : 'Some features require credit'}
-                  </p>
-                  <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-xs`}>
-                    {isPaid 
-                      ? 'You have full access to the Dashboard and Customers page.' 
-                      : 'You need at least R200 credit to access the Dashboard and Customers page.'}
-                  </p>
+              </div>
+              <div className="flex items-center">
+                <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Link WhatsApp</h2>
+                <div className={`ml-3 animate-pulse px-2 py-1 rounded-full text-xs font-semibold ${darkMode ? 'bg-amber-900/40 text-amber-400 border border-amber-700/30' : 'bg-amber-100 text-amber-800 border border-amber-200/60'}`}>
+                  In Development
                 </div>
               </div>
             </div>
             
-            <button
-              onClick={() => {
-                setShowPaymentModal(true);
-                openPaymentModal(); // Also open in context
-              }}
-              className="w-full inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-lg font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-              </svg>
-              Add Credit
-            </button>
-          </div>
-        </div>
-
-        {/* Security Settings Card - updated with MFA */}
-        <div className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700' : 'bg-gradient-to-br from-white to-gray-50 border-gray-100'} rounded-xl shadow-lg border p-6 hover:shadow-xl transition-all duration-200`}>
-          <div className="flex items-center mb-5">
-            <svg className={`h-8 w-8 mr-3 ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
-            </svg>
-            <h2 className={`text-2xl font-bold ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>Security Settings</h2>
-          </div>
-          
-          <div className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
-            <p className="mb-2">Manage your account security settings.</p>
-            {user?.email && (
-              <p className="font-medium mb-3">
-                Email: <span className={darkMode ? 'text-blue-400' : 'text-blue-600'}>{user.email}</span>
+            <div className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-5`}>
+              <p className="mb-3">Connect your WhatsApp account to send automated messages to customers.</p>
+              <p className="mb-3">
+                <span className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>Coming soon:</span> Automated loyalty updates, reminders, and promotions directly through WhatsApp.
               </p>
-            )}
-          </div>
-
-          {/* Two-Factor Authentication Status */}
-          <div className={`${darkMode ? 'bg-blue-900/20 border-blue-800' : 'bg-blue-50 border-blue-100'} p-4 rounded-lg border shadow-sm mb-4`}>
-            <div className="flex items-start">
-              <svg className={`h-5 w-5 mr-2 mt-0.5 ${darkMode ? mfaFactors.length ? 'text-green-600' : 'text-amber-600' : mfaFactors.length ? 'text-green-600' : 'text-amber-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                {mfaFactors.length ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                )}
+            </div>
+            
+            <button
+              disabled
+              className={`inline-flex items-center px-6 py-3 rounded-lg font-medium shadow-md text-sm opacity-70 ${
+                darkMode 
+                  ? 'bg-gradient-to-r from-green-800/50 to-emerald-800/50 text-green-400 cursor-not-allowed' 
+                  : 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-700 cursor-not-allowed'
+              }`}
+            >
+              <svg className="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
               </svg>
-              <div>
-                <p className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium mb-1`}>
-                  {mfaFactors.length 
-                    ? 'Two-factor authentication is enabled' 
-                    : 'Two-factor authentication is disabled'}
-                </p>
-                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-xs`}>
-                  {mfaFactors.length 
-                    ? 'Your account is secured with two-factor authentication.' 
-                    : 'We recommend enabling two-factor authentication for added security.'}
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          {/* MFA Controls */}
-          {mfaFactors.length > 0 ? (
-            <button
-              onClick={handleDisableMFA}
-              disabled={loadingMFA}
-              className={`w-full mb-3 inline-flex items-center justify-center px-4 py-2.5 ${darkMode ? 'bg-red-600 hover:bg-red-700' : 'bg-red-600 hover:bg-red-700'} text-white rounded-lg font-medium shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50`}
-            >
-              {loadingMFA ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Disabling...
-                </>
-              ) : (
-                <>
-                  <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
-                  </svg>
-                  Disable Two-Factor Auth
-                </>
-              )}
+              Connect WhatsApp
             </button>
-          ) : (
-            <button
-              onClick={() => setShowMFASetupModal(true)}
-              disabled={loadingMFA}
-              className="w-full mb-3 inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-lg font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-            >
-              {loadingMFA ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Loading...
-                </>
-              ) : (
-                <>
-                  <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                  </svg>
-                  Enable Two-Factor Auth
-                </>
-              )}
-            </button>
-          )}
-          
-          <button
-            onClick={() => setShowPasswordModal(true)}
-            className="w-full inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-lg font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
-            </svg>
-            Change Password
-          </button>
-        </div>
-        
-        {/* WhatsApp Integration Card */}
-        <div className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700' : 'bg-gradient-to-br from-white to-gray-50 border-gray-100'} rounded-xl shadow-lg border p-6 hover:shadow-xl transition-all duration-200`}>
-          <div className="flex items-center mb-5">
-            <svg className={`h-8 w-8 mr-3 ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-            </svg>
-            <div className="flex items-center">
-              <h2 className={`text-2xl font-bold ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>Link WhatsApp</h2>
-              <span className={`ml-3 px-2 py-1 text-xs font-semibold rounded-full ${darkMode ? 'bg-amber-900/40 text-amber-400' : 'bg-amber-100 text-amber-800'}`}>
-                In Development
-              </span>
-            </div>
           </div>
-          
-          <div className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
-            <p className="mb-2">Connect your WhatsApp account to send automated messages to customers.</p>
-            <p className="mb-3">
-              <span className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>Coming soon:</span> Automated loyalty updates, reminders, and promotions directly through WhatsApp.
-            </p>
-          </div>
-          
-          <button
-            disabled
-            className="w-full inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-lg font-medium shadow-md opacity-70 cursor-not-allowed"
-          >
-            <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
-            </svg>
-            Connect WhatsApp (Coming Soon)
-          </button>
         </div>
       </div>
 
-      {/* Use the memoized payment form */}
-      {paymentForm}
+      {/* Payment Modals */}
+      {showPaymentModal && (
+        <Payment onClose={() => setShowPaymentModal(false)} />
+      )}
+      
+      {contextShowPaymentModal && (
+        <Payment onClose={closePaymentModal} />
+      )}
+      
+      {showMFASetupModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50">
+          <div className="max-w-sm w-full transform transition-all">
+            <MFASetup onCancel={() => setShowMFASetupModal(false)} onEnrolled={handleMFAEnrolled} />
+          </div>
+        </div>
+      )}
       
       {/* Password Change Modal */}
       {passwordModal}
 
-      {/* MFA Setup Modal */}
-      {mfaSetupModal}
-      
       {/* MFA Disable Modal */}
       {disableMFAModal}
     </div>

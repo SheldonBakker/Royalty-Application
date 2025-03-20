@@ -17,7 +17,7 @@ interface EnrollMFAResponse {
   };
 }
 
-export function MFASetup({ onEnrolled, onCancel }: MFASetupProps) {
+export default function MFASetup({ onEnrolled, onCancel }: MFASetupProps) {
   const { darkMode } = useTheme();
   const { enrollMFA, challengeMFA, verifyMFA, listMFAFactors, unenrollMFA } = useAuth();
   const [factorId, setFactorId] = useState('');
@@ -237,22 +237,24 @@ export function MFASetup({ onEnrolled, onCancel }: MFASetupProps) {
   };
 
   return (
-    <div className={`max-w-md w-full space-y-6 p-8 ${darkMode ? 'bg-gray-800 text-gray-200' : 'bg-white text-gray-900'} rounded-lg shadow-md`}>
+    <div className={`max-w-md w-full space-y-4 p-5 ${darkMode ? 'bg-gray-800 text-gray-200' : 'bg-white text-gray-900'} rounded-lg shadow-md`}>
       <div>
-        <h2 className={`text-center text-2xl font-bold ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>
-          {enrolling ? 'Setting up Two-Factor Authentication...' : showExistingFactorMessage ? 'Authenticator Already Exists' : 'Set Up Two-Factor Authentication'}
+        <h2 className={`text-xl font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+          Set Up Two-Factor Authentication
         </h2>
-        
-        {!enrolling && !showExistingFactorMessage && (
-          <p className={`mt-2 text-center text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            Scan the QR code with your authenticator app
-          </p>
-        )}
+        <p className={`mt-1 text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+          Enhance your account security by setting up 2FA
+        </p>
       </div>
 
       {error && (
-        <div className={`${darkMode ? 'bg-red-900/20 border-red-700 text-red-400' : 'bg-red-100 border-red-400 text-red-700'} border px-4 py-3 rounded`}>
-          {error}
+        <div className={`p-2 text-xs rounded-md ${darkMode ? 'bg-red-900/50 text-red-200' : 'bg-red-100 text-red-800'}`}>
+          <div className="flex">
+            <svg className="h-4 w-4 mr-1.5 text-red-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{error}</span>
+          </div>
         </div>
       )}
 
@@ -315,36 +317,33 @@ export function MFASetup({ onEnrolled, onCancel }: MFASetupProps) {
           <div className="flex justify-center">
             {qrCode && (
               <div 
-                className={`p-4 ${darkMode ? 'bg-white' : 'bg-gray-100'} rounded-lg`}
+                className={`p-3 ${darkMode ? 'bg-white' : 'bg-gray-100'} rounded-lg`}
                 dangerouslySetInnerHTML={{ __html: qrCode }}
               />
             )}
           </div>
 
           {secret && (
-            <div className={`mt-4 p-3 ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg text-center`}>
-              <p className={`text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+            <div className={`mt-2 p-2 ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg text-center`}>
+              <p className={`text-xs font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                 If you can't scan the QR code, enter this secret manually:
               </p>
-              <p className={`font-mono text-sm select-all ${darkMode ? 'text-blue-400' : 'text-blue-700'}`}>
+              <p className={`font-mono text-xs select-all ${darkMode ? 'text-blue-400' : 'text-blue-700'}`}>
                 {secret}
               </p>
             </div>
           )}
 
-          <div className="mt-6">
-            <div className={`mb-4 p-3 ${darkMode ? 'bg-blue-900/20' : 'bg-blue-50'} rounded-lg`}>
-              <h3 className={`text-sm font-medium mb-2 ${darkMode ? 'text-blue-400' : 'text-blue-700'}`}>
-                Instructions:
-              </h3>
-              <ol className={`text-sm list-decimal list-inside ${darkMode ? 'text-gray-300' : 'text-gray-700'} space-y-2`}>
-                <li>Open your authenticator app (Google Authenticator, Authy, etc.)</li>
-                <li>Scan the QR code or enter the secret key manually</li>
-                <li>Enter the 6-digit code shown in your app</li>
-              </ol>
-            </div>
+          <div className={`mt-3 p-2 rounded-md ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+            <h3 className={`text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>Instructions:</h3>
+            <ol className={`mt-1 ml-4 list-decimal text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              <li>Scan the QR code with an authenticator app (Google Authenticator, Authy, etc.)</li>
+              <li>Enter the 6-digit code shown in your app below</li>
+            </ol>
+          </div>
 
-            <label htmlFor="verify-code" className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+          <div className="mt-3">
+            <label htmlFor="verify-code" className={`block text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
               Verification Code
             </label>
             <input
@@ -352,7 +351,7 @@ export function MFASetup({ onEnrolled, onCancel }: MFASetupProps) {
               name="verify-code"
               type="text"
               required
-              className={`appearance-none relative block w-full px-3 py-2 border ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-200 focus:ring-blue-500 focus:border-blue-500' : 'border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'} rounded-md focus:outline-none focus:z-10 sm:text-sm`}
+              className={`appearance-none relative block w-full px-3 py-1.5 border ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-200 focus:ring-blue-500 focus:border-blue-500' : 'border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'} rounded-md focus:outline-none focus:z-10 text-xs`}
               placeholder="Enter 6-digit code"
               value={verifyCode}
               onChange={handleCodeChange}
@@ -362,31 +361,31 @@ export function MFASetup({ onEnrolled, onCancel }: MFASetupProps) {
               pattern="[0-9]*"
             />
             <div className="mt-1 flex items-center justify-between">
-              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                TOTP codes expire after 30 seconds. Make sure your device time is accurate.
+              <p className={`text-2xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                TOTP codes expire after 30 seconds
               </p>
               {networkLatency && (
-                <span className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                <span className={`text-2xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                   Network: {networkLatency}ms
                 </span>
               )}
             </div>
             
             {codeExpiringSoon && (
-              <div className={`mt-2 text-xs ${darkMode ? 'text-amber-400' : 'text-amber-600'} flex items-center`}>
-                <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <div className={`mt-1 text-2xs ${darkMode ? 'text-amber-400' : 'text-amber-600'} flex items-center`}>
+                <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                Code is about to expire - consider waiting for a new code before verifying
+                Code is about to expire - wait for a new code
               </div>
             )}
           </div>
 
-          <div className="flex justify-between mt-6">
+          <div className="flex justify-between mt-3">
             <button
               type="button"
               onClick={onCancel}
-              className={`group relative w-1/3 py-2 px-4 border ${darkMode ? 'border-gray-600 text-gray-300 bg-gray-700 hover:bg-gray-600' : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'} text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+              className={`group relative w-1/3 py-1.5 px-2 border ${darkMode ? 'border-gray-600 text-gray-300 bg-gray-700 hover:bg-gray-600' : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'} text-xs font-medium rounded-md focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-blue-500`}
             >
               Cancel
             </button>
@@ -395,11 +394,11 @@ export function MFASetup({ onEnrolled, onCancel }: MFASetupProps) {
               id="verify-button"
               onClick={handleVerifyClick}
               disabled={loading || verifyCode.length !== 6}
-              className="group relative w-2/3 flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              className="group relative w-2/3 flex justify-center py-1.5 px-2 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-blue-500 disabled:opacity-50"
             >
               {loading ? (
                 <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin -ml-1 mr-1 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
@@ -414,4 +413,4 @@ export function MFASetup({ onEnrolled, onCancel }: MFASetupProps) {
       )}
     </div>
   );
-} 
+}
