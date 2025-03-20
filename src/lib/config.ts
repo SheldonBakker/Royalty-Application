@@ -62,8 +62,21 @@ function isValidApiKey(key: string): boolean {
 }
 
 function getConfig(): EnvConfig {
+  // Debug information
+  const debugInfo = process.env.NODE_ENV !== 'production';
+  
+  if (debugInfo) {
+    console.log('Environment mode:', process.env.NODE_ENV);
+  }
+
   // Check for window.ENV first (injected by Cloudflare Worker)
   if (typeof window !== 'undefined' && window.ENV) {
+    if (debugInfo) {
+      console.log('Using window.ENV environment variables');
+      console.log('SUPABASE_URL exists:', !!window.ENV.SUPABASE_URL);
+      console.log('SUPABASE_ANON_KEY exists:', !!window.ENV.SUPABASE_ANON_KEY);
+    }
+    
     const keys = {
       SUPABASE_URL: window.ENV.SUPABASE_URL || '',
       SUPABASE_ANON_KEY: window.ENV.SUPABASE_ANON_KEY || '',
@@ -78,8 +91,18 @@ function getConfig(): EnvConfig {
   
   // In Cloudflare Workers environment
   if (typeof window !== 'undefined' && 'CLOUDFLARE' in window) {
+    if (debugInfo) {
+      console.log('Using Cloudflare environment variables');
+    }
+    
     // First try to access environment variables from Cloudflare Secrets
     if (envSecrets) {
+      if (debugInfo) {
+        console.log('Using envSecrets');
+        console.log('SUPABASE_URL exists:', !!envSecrets.SUPABASE_URL);
+        console.log('SUPABASE_ANON_KEY exists:', !!envSecrets.SUPABASE_ANON_KEY);
+      }
+      
       return {
         SUPABASE_URL: envSecrets.SUPABASE_URL || '',
         SUPABASE_ANON_KEY: envSecrets.SUPABASE_ANON_KEY || '',
@@ -89,6 +112,10 @@ function getConfig(): EnvConfig {
     
     // Fallback to global variables if env is not available
     if (typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined') {
+      if (debugInfo) {
+        console.log('Using global variables');
+      }
+      
       return {
         SUPABASE_URL: SUPABASE_URL || '',
         SUPABASE_ANON_KEY: SUPABASE_ANON_KEY || '',
@@ -100,9 +127,18 @@ function getConfig(): EnvConfig {
   // In Vite/local development environment
   // These values are only available in development
   if (process.env.NODE_ENV !== 'production') {
+    if (debugInfo) {
+      console.log('Using Vite environment variables');
+      console.log('VITE_SUPABASE_URL:', getLocalEnv('VITE_SUPABASE_URL').substring(0, 5) + '...');
+      console.log('VITE_SUPABASE_ANON_KEY exists:', !!getLocalEnv('VITE_SUPABASE_ANON_KEY'));
+    }
+    
+    const localUrl = getLocalEnv('VITE_SUPABASE_URL');
+    const localKey = getLocalEnv('VITE_SUPABASE_ANON_KEY');
+    
     return {
-      SUPABASE_URL: getLocalEnv('VITE_SUPABASE_URL'),
-      SUPABASE_ANON_KEY: getLocalEnv('VITE_SUPABASE_ANON_KEY'),
+      SUPABASE_URL: localUrl,
+      SUPABASE_ANON_KEY: localKey,
       PAYSTACK_PUBLIC_KEY: getLocalEnv('VITE_PAYSTACK_PUBLIC_KEY'),
     };
   }
@@ -111,9 +147,19 @@ function getConfig(): EnvConfig {
   // This should never happen in production as the values should be 
   // injected by the Cloudflare Worker
   console.error('No environment variables found! Application will not work correctly.');
+  
+  // Use development values if available (not recommended for production)
+  // This is just to prevent immediate crashes during testing
+  const fallbackUrl = 'https://yourproject.supabase.co';
+  const fallbackKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlvdXJwcm9qZWN0IiwicmN0IjoiYW5vbiIsImV4cCI6OTk5OX0.placeholder';
+  
+  if (debugInfo) {
+    console.log('Using fallback values (not secure for production)');
+  }
+  
   return {
-    SUPABASE_URL: '',
-    SUPABASE_ANON_KEY: '',
+    SUPABASE_URL: fallbackUrl,
+    SUPABASE_ANON_KEY: fallbackKey,
     PAYSTACK_PUBLIC_KEY: '',
   };
 }
