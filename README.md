@@ -10,12 +10,15 @@ A web application for coffee shops to manage customer loyalty programs, track co
 - **Dashboard**: View key metrics and recent activity
 - **Redemption History**: Track when free coffees have been redeemed
 - **Authentication**: Secure login for staff members only
+- **Payment System**: Paystack integration for credit system
+- **Account Credits**: Access premium features with credit balance
 
 ## Technology Stack
 
 - **Frontend**: React with TypeScript, Tailwind CSS
 - **Backend**: Supabase (Authentication, Database)
 - **Build Tool**: Vite
+- **Payment Processing**: Paystack
 
 ## Prerequisites
 
@@ -36,10 +39,11 @@ cd coffee-loyalty
 npm install
 ```
 
-3. Create a `.env` file in the root directory with your Supabase credentials:
+3. Create a `.env` file in the root directory with your Supabase and Paystack credentials:
 ```
 VITE_SUPABASE_URL=your-supabase-project-url
 VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+VITE_PAYSTACK_PUBLIC_KEY=your-paystack-public-key
 ```
 
 4. Set up your Supabase database with the following tables:
@@ -60,22 +64,41 @@ VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 - **settings**: Stores application settings
   - id (uuid, primary key)
   - redemption_threshold (integer) - Default: 10
+  - has_paid (boolean) - Default: false
+  - credit_balance (numeric) - Default: 0
   - created_at (timestamp with timezone)
 
-5. Start the development server:
+- **payment_transactions**: Tracks payment transactions
+  - id (uuid, primary key)
+  - user_id (uuid, foreign key to auth.users.id)
+  - amount (numeric)
+  - status (varchar) - Options: 'pending', 'completed', 'failed'
+  - reference (varchar, unique)
+  - created_at (timestamp with timezone)
+  - payment_provider (varchar)
+  - provider_reference (varchar)
+  - metadata (jsonb)
+
+5. Run the SQL setup script to configure database functions and policies:
+```bash
+psql -U your_username -d your_database -a -f payment_system_setup.sql
+```
+
+6. Start the development server:
 ```bash
 npm run dev
 ```
 
-6. Open your browser and navigate to http://localhost:5173
+7. Open your browser and navigate to http://localhost:5173
 
 ## Usage
 
 1. **Register/Login**: Create a staff account to access the system
-2. **Add Customers**: Register new customers with their name and phone number
-3. **Record Purchases**: Add coffees to customer accounts as they make purchases
-4. **Process Redemptions**: Click the Redeem button when a customer has earned a free coffee
-5. **View Dashboard**: See statistics and recent activity
+2. **Add Credit**: Add credit to your account using Paystack to access premium features
+3. **Add Customers**: Register new customers with their name and phone number
+4. **Record Purchases**: Add coffees to customer accounts as they make purchases
+5. **Process Redemptions**: Click the Redeem button when a customer has earned a free coffee
+6. **View Dashboard**: See statistics and recent activity
 
 ## Production Deployment
 
