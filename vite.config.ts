@@ -41,6 +41,7 @@ export default defineConfig(({ mode }) => {
               }
               return 'vendor'; // All other dependencies
             }
+            return null;
           },
           // Optimize chunk file naming for better caching
           entryFileNames: isProduction 
@@ -63,7 +64,6 @@ export default defineConfig(({ mode }) => {
         compress: {
           drop_console: isProduction,
           drop_debugger: isProduction,
-          passes: 2, // Run compression twice for better results
         },
         format: {
           comments: false // Remove comments
@@ -75,16 +75,10 @@ export default defineConfig(({ mode }) => {
       cssCodeSplit: true,
       // Output configuration
       target: 'esnext',
-      modulePreload: {
-        polyfill: false, // Not needed for modern browsers
-      },
     },
     define: {
       // Replace process.env.NODE_ENV but leave other environment variables untouched
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || mode),
-      // Add a placeholder for import.meta.env to prevent complete removal
-      // but don't directly inject values
-      '__PLACEHOLDER_ENV__': 'window.__PLACEHOLDER_ENV__'
     },
     // Optimize development experience
     optimizeDeps: {
