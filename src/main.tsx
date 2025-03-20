@@ -1,5 +1,5 @@
 import { createRoot, Root } from 'react-dom/client'
-import { HashRouter } from 'react-router-dom'
+import { BrowserRouter } from 'react-router-dom'
 import { Component, ErrorInfo, ReactNode } from 'react'
 import './index.css'
 import App from './App.tsx'
@@ -102,9 +102,9 @@ const renderApp = () => {
   if (window.__REACT_ROOT) {
     window.__REACT_ROOT.render(
       <ErrorBoundary>
-        <HashRouter basename="/">
+        <BrowserRouter>
           <App />
-        </HashRouter>
+        </BrowserRouter>
       </ErrorBoundary>
     )
   }

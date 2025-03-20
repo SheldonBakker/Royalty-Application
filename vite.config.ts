@@ -7,7 +7,17 @@ export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
   
   return {
-    plugins: [react()],
+    plugins: [
+      react(),
+    ],
+    server: {
+      proxy: {},
+      strictPort: false,
+      cors: true,
+    },
+    preview: {
+      port: 5173,
+    },
     build: {
       outDir: 'dist',
       emptyOutDir: true,
