@@ -79,6 +79,11 @@ export default defineConfig(({ mode }) => {
     define: {
       // Replace process.env.NODE_ENV but leave other environment variables untouched
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || mode),
+      // Explicitly replace sensitive environment variables with empty placeholders
+      // to prevent them from being bundled in the client code
+      'import.meta.env.VITE_SUPABASE_URL': '"__RUNTIME_SUPABASE_URL__"',
+      'import.meta.env.VITE_SUPABASE_ANON_KEY': '"__RUNTIME_SUPABASE_ANON_KEY__"',
+      'import.meta.env.VITE_PAYSTACK_PUBLIC_KEY': '"__RUNTIME_PAYSTACK_PUBLIC_KEY__"',
     },
     // Optimize development experience
     optimizeDeps: {

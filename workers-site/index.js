@@ -15,6 +15,7 @@ class EnvInjector {
   
   element(element) {
     // Add environment variables to a script tag
+    // Only expose the minimum necessary information
     const scriptContent = `
       window.ENV = {
         SUPABASE_URL: "${this.env.SUPABASE_URL || ''}",
@@ -25,6 +26,33 @@ class EnvInjector {
     
     // Append script to head
     element.append(`<script>${scriptContent}</script>`, { html: true });
+  }
+}
+
+// Script rewriter to replace placeholder values with actual values
+class PlaceholderReplacer {
+  constructor(env) {
+    this.env = env;
+    this.placeholders = {
+      __RUNTIME_SUPABASE_URL__: this.env.SUPABASE_URL || '',
+      __RUNTIME_SUPABASE_ANON_KEY__: this.env.SUPABASE_ANON_KEY || '',
+      __RUNTIME_PAYSTACK_PUBLIC_KEY__: this.env.PAYSTACK_PUBLIC_KEY || '',
+    };
+  }
+  
+  element(element) {
+    // Don't modify script elements
+  }
+  
+  text(text) {
+    let content = text.text;
+    
+    // Replace placeholders with actual values
+    for (const [placeholder, value] of Object.entries(this.placeholders)) {
+      content = content.replace(new RegExp(placeholder, 'g'), value);
+    }
+    
+    text.replace(content);
   }
 }
 
@@ -72,15 +100,23 @@ async function handleEvent(event) {
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
     response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
     
-    // For HTML documents, apply special handling for SPA
+    // Get content type
     const contentType = response.headers.get('content-type') || '';
+    
+    // For HTML documents
     if (contentType.includes('text/html')) {
-      // For index.html, inject environment variables
+      // For index.html, inject environment variables as window.ENV
       if (url.pathname === '/' || url.pathname === '/index.html') {
         return new HTMLRewriter()
           .on('head', new EnvInjector(event.env))
           .transform(response);
       }
+    }
+    // For JavaScript assets, replace placeholders with env values
+    else if (contentType.includes('javascript')) {
+      return new HTMLRewriter()
+        .on('*', new PlaceholderReplacer(event.env))
+        .transform(response);
     }
     
     return response;

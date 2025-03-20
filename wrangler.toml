@@ -14,6 +14,13 @@ entry-point = "workers-site"
 command = "npm run build:prod"
 upload.format = "service-worker"
 
+[vars]
+# These are placeholder values that will be replaced with actual values by Cloudflare
+# Do NOT place real secrets here
+SUPABASE_URL = ""
+SUPABASE_ANON_KEY = ""
+PAYSTACK_PUBLIC_KEY = ""
+
 [env.production]
 name = "royalty-application"
 route = ""
