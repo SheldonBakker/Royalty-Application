@@ -1,9 +1,14 @@
 import { Link } from 'react-router-dom';
 import { useTheme } from '../hooks/useTheme';
 import { useEffect, useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { usePayment } from '../hooks/usePayment';
+import Footer from '../components/Footer';
 
 export function Home() {
   const { darkMode } = useTheme();
+  const { user } = useAuth();
+  const { openPaymentModal } = usePayment();
   const [isLoaded, setIsLoaded] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -60,20 +65,29 @@ export function Home() {
             </p>
             
             <div className={`flex flex-col sm:flex-row justify-center gap-6 mt-16 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} transition-all duration-1000 delay-500`}>
-              <Link
-                to="/register"
-                className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-4 px-10 rounded-lg font-medium shadow-xl hover:shadow-blue-500/30 dark:hover:shadow-blue-500/20 transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 text-lg relative overflow-hidden group"
-              >
-                <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></span>
-                Get Started Free
-                <span className="ml-2">→</span>
-              </Link>
-              <Link
-                to="/login"
-                className={`${darkMode ? 'bg-gray-800/80 text-white border-gray-700/80 hover:bg-gray-700/80 backdrop-blur-sm' : 'bg-white/90 text-gray-900 border-gray-200/90 hover:bg-gray-50/90 backdrop-blur-sm'} py-4 px-10 rounded-lg font-medium shadow-lg border hover:shadow-xl transition-all duration-300 text-lg hover:-translate-y-1`}
-              >
-                Log In
-              </Link>
+              {user ? (
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-4 px-10 rounded-lg font-medium shadow-xl text-lg relative overflow-hidden group">
+                  <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></span>
+                  Welcome {user.email}
+                </div>
+              ) : (
+                <>
+                  <Link
+                    to="/register"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-4 px-10 rounded-lg font-medium shadow-xl hover:shadow-blue-500/30 dark:hover:shadow-blue-500/20 transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 text-lg relative overflow-hidden group"
+                  >
+                    <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></span>
+                    Get Started Free
+                    <span className="ml-2">→</span>
+                  </Link>
+                  <Link
+                    to="/login"
+                    className={`${darkMode ? 'bg-gray-800/80 text-white border-gray-700/80 hover:bg-gray-700/80 backdrop-blur-sm' : 'bg-white/90 text-gray-900 border-gray-200/90 hover:bg-gray-50/90 backdrop-blur-sm'} py-4 px-10 rounded-lg font-medium shadow-lg border hover:shadow-xl transition-all duration-300 text-lg hover:-translate-y-1`}
+                  >
+                    Log In
+                  </Link>
+                </>
+              )}
             </div>
             
             {/* Trust badges */}
@@ -285,35 +299,28 @@ export function Home() {
                 </div>
               </div>
               
-              <Link
-                to="/register"
-                className="block w-full py-2.5 px-4 text-center rounded-lg font-medium bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800 transition-all duration-300 shadow-sm transform hover:-translate-y-0.5 text-sm"
-              >
-                Start Now
-              </Link>
+              {user ? (
+                <button
+                  onClick={openPaymentModal}
+                  className="block w-full py-2.5 px-4 text-center rounded-lg font-medium bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800 transition-all duration-300 shadow-sm transform hover:-translate-y-0.5 text-sm"
+                >
+                  Load Credits
+                </button>
+              ) : (
+                <Link
+                  to="/register"
+                  className="block w-full py-2.5 px-4 text-center rounded-lg font-medium bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800 transition-all duration-300 shadow-sm transform hover:-translate-y-0.5 text-sm"
+                >
+                  Start Now
+                </Link>
+              )}
             </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className={`py-16 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-900 text-gray-400 border-t border-gray-800' : 'bg-white text-gray-600 border-t border-gray-100'}`}>
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
-          <div className="mb-8 md:mb-0">
-            <div className={`flex items-center text-2xl font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-              <img src="/favicon.svg" className="h-8 w-8 mr-3" alt="Loyalty Bean logo" />
-              <span className={`bg-clip-text text-transparent bg-gradient-to-r ${darkMode ? 'from-blue-400 to-purple-400' : 'from-blue-600 to-indigo-600'}`}>Loyalty Bean</span>
-            </div>
-            <p className="text-sm">© {new Date().getFullYear()} Loyalty Bean. All rights reserved.</p>
-          </div>
-          <div className="flex space-x-10">
-            <Link to="/about" className="text-lg hover:underline transition-colors duration-200">About</Link>
-            <Link to="/register" className="text-lg hover:underline transition-colors duration-200">Sign Up</Link>
-            <Link to="/login" className="text-lg hover:underline transition-colors duration-200">Login</Link>
-            <a href="mailto:support@remlic.co.za" className="text-lg hover:underline transition-colors duration-200">Contact</a>
-          </div>
-        </div>
-      </footer>
+      <Footer variant="simple" />
     </div>
   );
 }

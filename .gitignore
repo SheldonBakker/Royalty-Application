@@ -31,4 +31,6 @@ dist-ssr
 .dev.vars
 
 # Cloudflare Workers
-.wrangler
+.wrangler/
+.dev.vars
+wrangler.toml

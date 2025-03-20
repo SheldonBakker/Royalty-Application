@@ -117,10 +117,8 @@ export function Navbar() {
                       }`}
                       onClick={(e) => {
                         if (location.hash === '#/settings') {
-                          console.log('Preventing navigation to current page');
                           e.preventDefault();
                         } else {
-                          console.log('Navigating to settings');
                           e.preventDefault();
                           navigate('/settings');
                         }
@@ -385,10 +383,8 @@ export function Navbar() {
                   onClick={(e) => {
                     setIsMenuOpen(false);
                     if (location.hash === '#/settings') {
-                      console.log('Preventing navigation to current page (mobile)');
                       e.preventDefault();
                     } else {
-                      console.log('Navigating to settings (mobile)');
                       e.preventDefault();
                       navigate('/settings');
                     }

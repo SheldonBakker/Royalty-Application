@@ -10,6 +10,7 @@ import { Settings } from '../pages/Settings';
 import { AboutUs } from '../pages/AboutUs';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { Home } from '../pages/Home';
+import AppLayout from '../components/AppLayout';
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -27,7 +28,7 @@ export function AppRoutes() {
       <Route path="/about" element={<AboutUs />} />
 
       {/* Protected routes */}
-      <Route path="/customers" element={<ProtectedRoute><ClientList /></ProtectedRoute>} />
+      <Route path="/customers" element={<ProtectedRoute><AppLayout><ClientList /></AppLayout></ProtectedRoute>} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/clients/new" element={<ProtectedRoute><NewClient /></ProtectedRoute>} />
       <Route path="/clients/:id" element={<ProtectedRoute><ClientDetails /></ProtectedRoute>} />

@@ -55,8 +55,6 @@ export default defineConfig(({ mode }) => {
             : 'assets/[name].[ext]',
         },
       },
-      // Important: Don't replace environment variables at build time
-      // This ensures they're resolved at runtime in Cloudflare Workers
       sourcemap: !isProduction,
       // Enable minification
       minify: isProduction ? 'terser' : false,
@@ -64,9 +62,28 @@ export default defineConfig(({ mode }) => {
         compress: {
           drop_console: isProduction,
           drop_debugger: isProduction,
+          pure_funcs: isProduction ? ['console.log', 'console.debug', 'console.info', 'console.warn'] : [],
+          global_defs: {
+            DEBUG: !isProduction
+          },
+          passes: 3, // Multiple passes for better minification
+          toplevel: true, // Better variable renaming
+          unsafe: true, // Enable all unsafe optimizations
+          unsafe_math: true,
+          unsafe_proto: true,
+          unsafe_regexp: true
         },
         format: {
-          comments: false // Remove comments
+          comments: false, // Remove comments
+          ecma: 2020, // Modern JS for better minification
+          webkit: true, // Apply WebKit-specific optimizations
+          wrap_iife: true, // Wrap IIFEs for safety and smaller size
+          ascii_only: true // Use ASCII-only encoding for better compatibility
+        },
+        mangle: {
+          properties: {
+            regex: /^_/ // Mangle properties starting with underscore
+          }
         }
       },
       // Reduce chunk size
@@ -79,11 +96,8 @@ export default defineConfig(({ mode }) => {
     define: {
       // Replace process.env.NODE_ENV but leave other environment variables untouched
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || mode),
-      // Explicitly replace sensitive environment variables with empty placeholders
-      // to prevent them from being bundled in the client code
-      'import.meta.env.VITE_SUPABASE_URL': '"__RUNTIME_SUPABASE_URL__"',
-      'import.meta.env.VITE_SUPABASE_ANON_KEY': '"__RUNTIME_SUPABASE_ANON_KEY__"',
-      'import.meta.env.VITE_PAYSTACK_PUBLIC_KEY': '"__RUNTIME_PAYSTACK_PUBLIC_KEY__"',
+      // Disable React DevTools in production - using JSON.stringify for proper syntax
+      ...(isProduction && { '__REACT_DEVTOOLS_GLOBAL_HOOK__': JSON.stringify({ isDisabled: true }) }),
     },
     // Optimize development experience
     optimizeDeps: {

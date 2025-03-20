@@ -284,7 +284,9 @@ export async function hasUserPaid() {
                                status.credit_balance !== undefined && 
                                status.credit_balance >= 200;
     
-    // More detailed debug payment status to help troubleshoot
+    // Disable verbose logging completely
+    // Uncomment the block below if you need debug logging
+    /*
     console.log('===== PAYMENT STATUS CHECK =====');
     console.log('Raw status data:', status);
     console.log('Credit balance type:', typeof status.credit_balance);
@@ -299,6 +301,7 @@ export async function hasUserPaid() {
     });
     console.log('Final result (has_paid || hasSufficientCredit):', status.has_paid || hasSufficientCredit);
     console.log('===============================');
+    */
     
     return status.has_paid || hasSufficientCredit;
   } catch (err) {

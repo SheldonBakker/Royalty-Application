@@ -11,7 +11,6 @@ import MFASetup from '../../components/MFASetup';
 import { Factor } from '@supabase/supabase-js';
 
 export function Settings() {
-  console.log('Settings component mounted');
   const { darkMode } = useTheme();
   const { user } = useAuth();
   const { refreshPaymentStatus, isLoadingPayment, showPaymentModal: contextShowPaymentModal, closePaymentModal, openPaymentModal } = usePayment();

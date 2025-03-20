@@ -1,8 +1,12 @@
 import { useTheme } from '../hooks/useTheme';
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import Footer from '../components/Footer';
 
 export function AboutUs() {
   const { darkMode } = useTheme();
+  const { user } = useAuth();
   const [isLoaded, setIsLoaded] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -351,41 +355,58 @@ export function AboutUs() {
           <div className={`mb-10 transition-all duration-700 transform ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`} style={{ transitionDelay: '1000ms' }}>
             <h2 className={`text-3xl font-bold mb-6 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
               Ready to Get Started?
-          </h2>
-            <p className={`text-lg mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'} max-w-2xl mx-auto`}>
-              Begin your journey with Loyalty Bean today. Add your first customer and start tracking purchases to build a loyal customer base that keeps coming back.
-            </p>
-            <div className="flex justify-center gap-6 flex-col sm:flex-row">
-              <a 
-                href="/register" 
-                className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-3 px-8 rounded-lg font-medium shadow-xl hover:shadow-blue-500/30 dark:hover:shadow-blue-500/20 transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 text-lg relative overflow-hidden group"
-              >
-                <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></span>
-                Create an Account
-                <span className="ml-2">→</span>
-              </a>
-              <a 
-                href="/login" 
-                className={`${darkMode ? 'bg-gray-800/80 text-white border-gray-700/80 hover:bg-gray-700/80' : 'bg-white/90 text-gray-900 border-gray-200/90 hover:bg-gray-50/90'} py-3 px-8 rounded-lg font-medium shadow-lg border hover:shadow-xl transition-all duration-300 text-lg hover:-translate-y-1`}
-              >
-                Sign In
-              </a>
-            </div>
+            </h2>
+            {user ? (
+              <>
+                <p className={`text-lg mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'} max-w-2xl mx-auto`}>
+                  Welcome back, {user.email}! Continue managing your loyalty program and start growing your customer base.
+                </p>
+                <div className="flex justify-center gap-6 flex-col sm:flex-row">
+                  <Link 
+                    to="/dashboard" 
+                    className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-3 px-8 rounded-lg font-medium shadow-xl hover:shadow-blue-500/30 dark:hover:shadow-blue-500/20 transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 text-lg relative overflow-hidden group"
+                  >
+                    <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></span>
+                    Go to Dashboard
+                    <span className="ml-2">→</span>
+                  </Link>
+                  <Link 
+                    to="/customers" 
+                    className={`${darkMode ? 'bg-gray-800/80 text-white border-gray-700/80 hover:bg-gray-700/80' : 'bg-white/90 text-gray-900 border-gray-200/90 hover:bg-gray-50/90'} py-3 px-8 rounded-lg font-medium shadow-lg border hover:shadow-xl transition-all duration-300 text-lg hover:-translate-y-1`}
+                  >
+                    Manage Customers
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className={`text-lg mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'} max-w-2xl mx-auto`}>
+                  Begin your journey with Loyalty Bean today. Add your first customer and start tracking purchases to build a loyal customer base that keeps coming back.
+                </p>
+                <div className="flex justify-center gap-6 flex-col sm:flex-row">
+                  <Link 
+                    to="/register" 
+                    className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-3 px-8 rounded-lg font-medium shadow-xl hover:shadow-blue-500/30 dark:hover:shadow-blue-500/20 transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 text-lg relative overflow-hidden group"
+                  >
+                    <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></span>
+                    Create an Account
+                    <span className="ml-2">→</span>
+                  </Link>
+                  <Link 
+                    to="/login" 
+                    className={`${darkMode ? 'bg-gray-800/80 text-white border-gray-700/80 hover:bg-gray-700/80' : 'bg-white/90 text-gray-900 border-gray-200/90 hover:bg-gray-50/90'} py-3 px-8 rounded-lg font-medium shadow-lg border hover:shadow-xl transition-all duration-300 text-lg hover:-translate-y-1`}
+                  >
+                    Sign In
+                  </Link>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className={`py-10 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-800 text-gray-400 border-t border-gray-700' : 'bg-gray-50 text-gray-600 border-t border-gray-100'}`}>
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center">
-            <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              Have questions? Contact us at <a href="mailto:support@remlic.co.za" className={`font-medium ${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} transition-colors duration-200`}>support@remlic.co.za</a>
-            </p>
-            <p className="mt-4 text-sm">© {new Date().getFullYear()} Loyalty Bean. All rights reserved.</p>
-          </div>
-      </div>
-      </footer>
+      <Footer variant="simple" />
     </div>
   );
 }

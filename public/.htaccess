@@ -1,0 +1,55 @@
+# Apache .htaccess file for protecting JavaScript assets
+
+# Enable the rewrite engine
+RewriteEngine On
+
+# Protect source maps in production
+<Files ~ "\.map$">
+  Order allow,deny
+  Deny from all
+</Files>
+
+# Prevent direct access to specific JS files but allow them to be loaded by the application
+# Adjust the pattern as needed to target specific directories or patterns
+RewriteCond %{HTTP_REFERER} !^https?://(www\.)?yourdomain\.com/ [NC]
+RewriteRule ^assets/.+\.(js)$ - [F,L]
+
+# Add far-future expires headers for better caching
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType text/javascript "access plus 1 year"
+</IfModule>
+
+# Add proper content security policy headers to prevent script tampering
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-XSS-Protection "1; mode=block"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Content-Security-Policy "default-src 'self'; script-src 'self'; object-src 'none'"
+  
+  # Remove server signature
+  ServerSignature Off
+  Header unset Server
+  Header unset X-Powered-By
+</IfModule>
+
+# Disable directory browsing
+Options -Indexes
+
+# Protect against common vulnerabilities
+<IfModule mod_rewrite.c>
+  # Protect against common XSS attacks
+  RewriteCond %{QUERY_STRING} (\<|%3C).*script.*(\>|%3E) [NC,OR]
+  RewriteCond %{QUERY_STRING} javascript\: [NC,OR]
+  RewriteCond %{QUERY_STRING} vbscript\: [NC]
+  RewriteRule .* - [F,L]
+</IfModule>
+
+# Compression for faster loading and additional obscurity
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE application/javascript
+  AddOutputFilterByType DEFLATE text/javascript
+  AddOutputFilterByType DEFLATE text/html
+  AddOutputFilterByType DEFLATE text/css
+</IfModule> 

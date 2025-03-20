@@ -3,7 +3,11 @@ import { BrowserRouter } from 'react-router-dom'
 import { Component, ErrorInfo, ReactNode } from 'react'
 import './index.css'
 import App from './App.tsx'
-import { setEnvSecrets } from './lib/config'
+import { disableDevTools } from './lib/disableDevTools'
+import './lib/copyright.js'
+
+// Initialize development tools configuration
+disableDevTools();
 
 // Error boundary to catch and handle asynchronous errors
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
@@ -67,15 +71,15 @@ window.addEventListener('unhandledrejection', (event) => {
   }
 })
 
-// Add navigation event monitoring for debugging
-if (process.env.NODE_ENV !== 'production') {
-  window.addEventListener('hashchange', (event) => {
-    console.log('Navigation event (hash):', {
-      from: event.oldURL,
-      to: event.newURL
-    })
-  })
-}
+// Remove development-specific navigation monitoring
+// if (process.env.NODE_ENV !== 'production') {
+//   window.addEventListener('hashchange', (event) => {
+//     console.log('Navigation event (hash):', {
+//       from: event.oldURL,
+//       to: event.newURL
+//     })
+//   })
+// }
 
 // Prevent duplicate root creation
 const rootElement = document.getElementById('root')
@@ -102,7 +106,10 @@ const renderApp = () => {
   if (window.__REACT_ROOT) {
     window.__REACT_ROOT.render(
       <ErrorBoundary>
-        <BrowserRouter>
+        <BrowserRouter future={{ 
+          v7_startTransition: true,
+          v7_relativeSplatPath: true
+        }}>
           <App />
         </BrowserRouter>
       </ErrorBoundary>
@@ -118,20 +125,4 @@ if (import.meta.hot) {
   import.meta.hot.accept('./App.tsx', () => {
     renderApp()
   })
-}
-
-interface CloudflareEnv {
-  env: {
-    SUPABASE_URL: string;
-    SUPABASE_ANON_KEY: string;
-    PAYSTACK_PUBLIC_KEY: string;
-  };
-}
-
-// Check if running in Cloudflare Workers environment and set env secrets
-if (typeof window !== 'undefined' && 'CLOUDFLARE' in window) {
-  const selfWithEnv = self as unknown as CloudflareEnv;
-  if (selfWithEnv.env) {
-    setEnvSecrets(selfWithEnv.env);
-  }
 }

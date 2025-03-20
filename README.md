@@ -19,14 +19,12 @@ A web application for coffee shops to manage customer loyalty programs, track co
 - **Backend**: Supabase (Authentication, Database)
 - **Build Tool**: Vite 6
 - **Payment Processing**: Paystack
-- **Hosting**: Cloudflare Workers
 
 ## Prerequisites
 
 - Node.js (v18+)
 - npm or yarn
 - Supabase account with project set up
-- Cloudflare account (for deployment)
 
 ## Getting Started
 
@@ -104,77 +102,19 @@ npm run dev
 - `npm run build:prod`: Optimized production build
 - `npm run lint`: Run ESLint to check code quality
 - `npm run preview`: Preview the production build locally
-- `npm run deploy`: Build and deploy to Cloudflare Workers
-- `npm run deploy:staging`: Build and deploy to Cloudflare Workers staging environment
 - `npm run clean`: Clean build artifacts
 - `npm run build:clean`: Clean and rebuild
 - `npm run analyze`: Analyze bundle size
 
 ## Production Deployment
 
-To build and deploy the application to Cloudflare Workers:
+To build the application for production:
 
 ```bash
-npm run deploy
+npm run build:prod
 ```
 
-This will:
-1. Build the application with optimizations
-2. Deploy to Cloudflare Workers using Wrangler
-
-## Deploying to Cloudflare Workers
-
-### Prerequisites
-
-1. Install Wrangler CLI:
-   ```
-   npm install -g wrangler
-   ```
-2. Authenticate with Cloudflare:
-   ```
-   wrangler login
-   ```
-
-### Setting Environment Variables
-
-There are two ways to set environment variables in Cloudflare:
-
-#### Method 1: Using the Cloudflare Dashboard
-
-1. Go to the Cloudflare Dashboard
-2. Navigate to Workers & Pages
-3. Select your application
-4. Go to Settings > Variables
-5. Add your environment variables:
-   - `SUPABASE_URL`
-   - `SUPABASE_ANON_KEY`
-   - `PAYSTACK_PUBLIC_KEY`
-
-#### Method 2: Using Wrangler CLI
-
-Use the following commands to set your secrets:
-
-```bash
-wrangler secret put SUPABASE_URL
-wrangler secret put SUPABASE_ANON_KEY
-wrangler secret put PAYSTACK_PUBLIC_KEY
-```
-
-The CLI will prompt you to enter the values securely.
-
-### Local Development with Secrets
-
-For local development with Wrangler, create a `.dev.vars` file in the project root:
-
-```
-SUPABASE_URL=your_supabase_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-PAYSTACK_PUBLIC_KEY=your_paystack_public_key
-```
-
-This file is automatically loaded by Wrangler when running `wrangler dev`, making your secrets available in the local development environment.
-
-**Important**: The `.dev.vars` file is included in `.gitignore` to prevent committing secrets to your repository.
+This will create optimized production files in the `dist` directory that you can deploy to any static hosting service.
 
 ## Build Optimization
 
@@ -205,10 +145,6 @@ This build process:
    - Adds content hashes to file names for optimal caching
    - Optimizes CSS delivery
 
-4. **Environment Variable Handling**:
-   - Preserves runtime environment variable access for Cloudflare Workers
-   - Does not embed sensitive values at build time
-
 ### Development Build
 
 For local development with full source maps and without minification:
@@ -219,45 +155,24 @@ npm run dev
 
 ## How Environment Variables Work
 
-The application is configured to handle environment variables in two ways:
-
-1. In development, it uses Vite's `import.meta.env` to access variables from the `.env` file
-2. In production (Cloudflare Workers), it accesses the environment variables directly from the global scope
+The application is configured to handle environment variables using Vite's `import.meta.env` to access variables from the `.env` file.
 
 This is managed in the `src/lib/config.ts` file, which provides a consistent interface for accessing these variables throughout the application.
 
 ## Troubleshooting
 
-### Environment Variables Not Loading from Cloudflare Secrets
+### Environment Variables Not Loading
 
-If your application is still using environment variables from your local `.env` file instead of Cloudflare Secrets, try the following steps:
+If your application cannot access environment variables, try the following steps:
 
-1. **Verify Secrets Configuration**: 
-   Make sure your secrets are properly set in Cloudflare:
-   ```bash
-   wrangler secret list
-   ```
-   You should see your secrets listed. If not, add them using the commands in the "Using Cloudflare Secrets" section.
+1. **Check .env File**:
+   Ensure your `.env` file is in the project root and contains all required variables.
 
-2. **Check .dev.vars File**:
-   For local development, ensure you have created a `.dev.vars` file with your environment variables.
-
-3. **Clear Build Cache**:
+2. **Clear Build Cache**:
    Sometimes Vite's build cache can cause issues with environment variable replacement:
    ```bash
    npm run clean
    rm -rf node_modules/.vite
-   ```
-
-4. **Ensure Dynamic Configuration**:
-   Check that your application is using dynamic configuration loading as implemented in the `src/lib/config.ts` file:
-   - Don't directly reference `import.meta.env` in other files
-   - Always use the exported `getEnvConfig()` function to access environment variables
-
-5. **Rebuild and Deploy**:
-   ```bash
-   npm run build
-   wrangler deploy
    ```
 
 ## Contributing

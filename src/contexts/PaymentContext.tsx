@@ -26,8 +26,8 @@ export function PaymentProvider({ children }: { children: ReactNode }) {
   const lastCheckTimeRef = useRef(0);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cacheTimeRef = useRef(0);
-  // Increase cache validity to 2 minutes to reduce frequent checks
-  const cacheValidityMs = 120000; // Cache valid for 2 minutes
+  // Increase cache validity to 5 minutes to further reduce frequent checks
+  const cacheValidityMs = 300000; // Cache valid for 5 minutes
 
   // Function to check and update payment status
   const checkPaymentStatus = useCallback(async (forceRefresh = false) => {
@@ -47,8 +47,8 @@ export function PaymentProvider({ children }: { children: ReactNode }) {
       return;
     }
     
-    // Increase debounce time - don't check more than once every 5 seconds
-    if (now - lastCheckTimeRef.current < 5000) {
+    // Increase debounce time - don't check more than once every 30 seconds
+    if (now - lastCheckTimeRef.current < 30000) {
       return;
     }
     
@@ -69,14 +69,20 @@ export function PaymentProvider({ children }: { children: ReactNode }) {
       
       // Get payment status directly
       const isPaid = await hasUserPaid();
-      const paymentStatus = await getUserPaymentStatus();
+      
+      // Only fetch detailed status if not already paid
+      let balance = 0;
+      if (!isPaid) {
+        const paymentStatus = await getUserPaymentStatus();
+        balance = paymentStatus.credit_balance || 0;
+      }
       
       // Update state
       setHasPaid(isPaid);
-      setCreditBalance(paymentStatus.credit_balance || 0);
+      setCreditBalance(balance);
       
       // If payment is now valid, close the payment modal if it was open
-      if (isPaid || (paymentStatus.credit_balance && paymentStatus.credit_balance >= 200)) {
+      if (isPaid || balance >= 200) {
         setShowPaymentModal(false);
       }
       
@@ -105,7 +111,7 @@ export function PaymentProvider({ children }: { children: ReactNode }) {
       debounceTimerRef.current = setTimeout(async () => {
         await checkPaymentStatus(true); // Force refresh
         resolve();
-      }, 500); // Increase debounce time to 500ms
+      }, 1000); // Increase debounce time to 1000ms
     });
   }, [checkPaymentStatus]);
 
