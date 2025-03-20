@@ -20,6 +20,15 @@ declare global {
     SUPABASE_ANON_KEY: string;
     PAYSTACK_PUBLIC_KEY: string;
   }
+  
+  // For browser window.ENV
+  interface Window {
+    ENV?: {
+      SUPABASE_URL: string;
+      SUPABASE_ANON_KEY: string;
+      PAYSTACK_PUBLIC_KEY: string;
+    }
+  }
 }
 
 // Global variable to store environment access
@@ -40,6 +49,15 @@ function getLocalEnv(key: string): string {
 }
 
 function getConfig(): EnvConfig {
+  // Check for window.ENV first (injected by Cloudflare Worker)
+  if (typeof window !== 'undefined' && window.ENV) {
+    return {
+      SUPABASE_URL: window.ENV.SUPABASE_URL || '',
+      SUPABASE_ANON_KEY: window.ENV.SUPABASE_ANON_KEY || '',
+      PAYSTACK_PUBLIC_KEY: window.ENV.PAYSTACK_PUBLIC_KEY || '',
+    };
+  }
+  
   // In Cloudflare Workers environment
   if (typeof window !== 'undefined' && 'CLOUDFLARE' in window) {
     // First try to access environment variables from Cloudflare Secrets

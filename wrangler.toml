@@ -1,0 +1,27 @@
+name = "royalty-application"
+type = "javascript"
+account_id = ""
+workers_dev = true
+route = ""
+zone_id = ""
+compatibility_date = "2023-09-01"
+
+[site]
+bucket = "./dist"
+entry-point = "workers-site"
+
+[build]
+command = "npm run build:prod"
+upload.format = "service-worker"
+
+[build.upload]
+format = "service-worker"
+
+[env.production]
+name = "royalty-application"
+route = ""
+zone_id = ""
+
+[env.staging]
+name = "royalty-application-staging"
+workers_dev = true 
