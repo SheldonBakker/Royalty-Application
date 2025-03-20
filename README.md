@@ -1,4 +1,4 @@
-# Coffee Shop Loyalty Application
+Coffee Shop Loyalty Application
 
 A web application for coffee shops to manage customer loyalty programs, track coffee purchases, and handle free coffee redemptions.
 
