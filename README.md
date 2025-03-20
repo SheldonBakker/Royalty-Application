@@ -117,3 +117,84 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Development Setup
+
+1. Clone the repository
+2. Install dependencies:
+   ```
+   npm install
+   ```
+3. Create a `.env` file in the root directory with the following variables:
+   ```
+   VITE_SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   VITE_PAYSTACK_PUBLIC_KEY=your_paystack_public_key
+   ```
+4. Start the development server:
+   ```
+   npm run dev
+   ```
+
+## Deploying to Cloudflare Workers
+
+### Prerequisites
+
+1. Install Wrangler CLI:
+   ```
+   npm install -g wrangler
+   ```
+2. Authenticate with Cloudflare:
+   ```
+   wrangler login
+   ```
+
+### Setting Environment Variables
+
+There are two ways to set environment variables in Cloudflare:
+
+#### Method 1: Using the Cloudflare Dashboard
+
+1. Go to the Cloudflare Dashboard
+2. Navigate to Workers & Pages
+3. Select your application
+4. Go to Settings > Variables
+5. Add your environment variables:
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY`
+   - `PAYSTACK_PUBLIC_KEY`
+
+#### Method 2: Using Wrangler CLI
+
+Use the following commands to set your secrets:
+
+```bash
+wrangler secret put SUPABASE_URL
+wrangler secret put SUPABASE_ANON_KEY
+wrangler secret put PAYSTACK_PUBLIC_KEY
+```
+
+The CLI will prompt you to enter the values securely.
+
+### Deployment
+
+#### Deploy to Production
+
+```bash
+npm run deploy
+```
+
+#### Deploy to Staging
+
+```bash
+npm run deploy:staging
+```
+
+## How Environment Variables Work
+
+The application is configured to handle environment variables in two ways:
+
+1. In development, it uses Vite's `import.meta.env` to access variables from the `.env` file
+2. In production (Cloudflare Workers), it accesses the environment variables directly from the global scope
+
+This is managed in the `src/lib/config.ts` file, which provides a consistent interface for accessing these variables throughout the application.
