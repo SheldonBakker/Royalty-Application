@@ -14,9 +14,6 @@ entry-point = "workers-site"
 command = "npm run build:prod"
 upload.format = "service-worker"
 
-[build.upload]
-format = "service-worker"
-
 [env.production]
 name = "royalty-application"
 route = ""
