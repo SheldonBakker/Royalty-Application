@@ -12,10 +12,27 @@
     <meta name="msapplication-TileColor" content="#4A2E1D" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Security headers -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://vhcehncbwkpgckyitofa.supabase.co; frame-src 'self' https://checkout.paystack.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.paystack.co; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://vhcehncbwkpgckyitofa.supabase.co; frame-src 'self' https://checkout.paystack.com;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
+    
+    <!-- Environment variables initialization -->
+    <script>
+      // Initialize window.__ENV for environment variables
+      window.__ENV = window.__ENV || {};
+      
+      // This will be populated by Cloudflare middleware or Vite during build
+      document.addEventListener('DOMContentLoaded', function() {
+        // For debugging purposes only
+        console.log('Environment check:', {
+          hasCloudflare: !!window.CLOUDFLARE,
+          hasEnvVars: !!window.__ENV,
+          supabaseUrlSet: !!window.__ENV.VITE_SUPABASE_URL,
+          supabaseKeySet: !!window.__ENV.VITE_SUPABASE_ANON_KEY
+        });
+      });
+    </script>
     
     <!-- SEO meta tags -->
     <meta name="description" content="Loyalty Bean - A customer loyalty program application for coffee shops and cafes">

@@ -1,5 +1,5 @@
 // Configuration file to handle environment variables
-// Works with local .env (Vite) environment variables
+// Works with local .env (Vite) environment variables and Cloudflare environment variables
 
 interface EnvConfig {
   SUPABASE_URL: string;
@@ -7,11 +7,28 @@ interface EnvConfig {
   PAYSTACK_PUBLIC_KEY: string;
 }
 
+// Extend Window interface to include our custom properties
+interface CustomWindow extends Window {
+  __ENV?: {
+    [key: string]: string;
+  };
+  CLOUDFLARE?: boolean;
+}
+
+declare const window: CustomWindow;
+
 // Function to get environment variables
 function getLocalEnv(key: string): string {
+  // First check if we have window.__ENV variables (for Cloudflare production)
+  if (typeof window !== 'undefined' && window.__ENV && window.__ENV[key]) {
+    return window.__ENV[key] || '';
+  }
+  
+  // Fall back to Vite's import.meta.env (for development)
   if (typeof import.meta !== 'undefined' && import.meta.env) {
     return import.meta.env[key] || '';
   }
+  
   return '';
 }
 

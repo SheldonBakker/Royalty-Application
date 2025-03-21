@@ -10,6 +10,8 @@ import { Settings } from '../pages/Settings';
 import { AboutUs } from '../pages/AboutUs';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { Home } from '../pages/Home';
+import { ResetPassword } from '../pages/ResetPassword';
+import { ResetConfirmation } from '../pages/ResetConfirmation';
 import AppLayout from '../components/AppLayout';
 
 const LoadingSpinner = () => (
@@ -25,6 +27,8 @@ export function AppRoutes() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<AppLayout><Login /></AppLayout>} />
       <Route path="/register" element={<AppLayout><Register /></AppLayout>} />
+      <Route path="/reset-password" element={<AppLayout><ResetPassword /></AppLayout>} />
+      <Route path="/reset-confirmation" element={<AppLayout><ResetConfirmation /></AppLayout>} />
       <Route path="/about" element={<AboutUs />} />
 
       {/* Protected routes */}

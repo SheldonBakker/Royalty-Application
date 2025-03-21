@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { usePaystackPayment } from 'react-paystack';
 import { useAuth } from '../hooks/useAuth';
 import { usePayment } from '../hooks/usePayment';
@@ -13,39 +13,6 @@ import { getEnvConfig } from '../lib/config';
 type PaymentProps = {
   onClose?: () => void;
   onSuccess?: () => void;
-};
-
-// Add a component to display debug information
-const DebugInfo = ({ creditBalance, hasPaid }: { creditBalance: number, hasPaid: boolean }) => {
-  const [showDebug, setShowDebug] = useState(false);
-  const location = useLocation();
-  
-  // Check if current page is exempt from payment verification
-  const isExemptPage = () => {
-    const exemptPaths = ['/settings', '/about'];
-    return exemptPaths.some(path => location.pathname === path);
-  };
-
-  return (
-    <div className="mt-6 text-center">
-      <button 
-        onClick={() => setShowDebug(!showDebug)}
-        className="text-xs text-gray-500 underline"
-      >
-        {showDebug ? 'Hide Debug Info' : 'Show Debug Info'}
-      </button>
-      
-      {showDebug && (
-        <div className="mt-2 p-3 bg-gray-100 rounded-md text-left text-xs">
-          <p><strong>Credit Balance:</strong> R{creditBalance.toFixed(2)}</p>
-          <p><strong>Has Paid Flag:</strong> {hasPaid ? 'true' : 'false'}</p>
-          <p><strong>Payment Threshold:</strong> R200.00</p>
-          <p><strong>Page Exempt From Payment:</strong> {isExemptPage() ? 'Yes' : 'No'}</p>
-          <p><strong>Payment Status:</strong> {creditBalance >= 200 || hasPaid ? 'Sufficient' : 'Insufficient'}</p>
-        </div>
-      )}
-    </div>
-  );
 };
 
 // Define proper types for Paystack
@@ -432,9 +399,6 @@ export function Payment({ onClose, onSuccess }: PaymentProps) {
       <div className="mt-4 text-center text-sm text-gray-400">
         <p>Secure payment powered by Paystack</p>
       </div>
-
-      {/* Add debug info component */}
-      <DebugInfo creditBalance={creditBalance} hasPaid={hasPaid} />
     </div>
   );
 }
