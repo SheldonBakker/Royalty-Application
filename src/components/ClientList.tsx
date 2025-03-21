@@ -97,6 +97,13 @@ export function ClientList() {
       const clientIndex = clients.findIndex(client => client.id === id);
       if (clientIndex === -1) return;
       
+      // Check if this client has already reached the redemption threshold
+      if (clients[clientIndex].coffees_purchased >= redemptionThreshold) {
+        setError(`Customer ${clients[clientIndex].name} has already reached the redemption threshold. Please redeem the reward first.`);
+        setIsProcessing(null);
+        return;
+      }
+      
       // Create a new array with the optimistic update
       const updatedClients = [...clients];
       updatedClients[clientIndex] = {
@@ -383,9 +390,9 @@ export function ClientList() {
                         <div className="flex space-x-3">
                           <button
                             onClick={() => handleAddCoffee(client.id)}
-                            disabled={isProcessing === client.id}
+                            disabled={isProcessing === client.id || client.coffees_purchased >= redemptionThreshold}
                             className={`inline-flex items-center py-1.5 px-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                              isProcessing === client.id 
+                              isProcessing === client.id || client.coffees_purchased >= redemptionThreshold
                                 ? `${darkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'} cursor-not-allowed`
                                 : 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow hover:shadow-md hover:-translate-y-0.5'
                             }`}
@@ -504,9 +511,9 @@ export function ClientList() {
                   <div className="flex space-x-2">
                     <button
                       onClick={() => handleAddCoffee(client.id)}
-                      disabled={isProcessing === client.id}
+                      disabled={isProcessing === client.id || client.coffees_purchased >= redemptionThreshold}
                       className={`flex-1 inline-flex items-center justify-center py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                        isProcessing === client.id 
+                        isProcessing === client.id || client.coffees_purchased >= redemptionThreshold
                           ? `${darkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'} cursor-not-allowed`
                           : 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow hover:shadow-md hover:-translate-y-0.5'
                       }`}

@@ -55,6 +55,12 @@ export function ClientDetails() {
   const handleAddCoffee = async () => {
     if (!client || isProcessing) return;
     
+    // Prevent adding more units if the redemption threshold has been reached
+    if (client.coffees_purchased >= redemptionThreshold) {
+      setError('Customer has already reached the redemption threshold. Please redeem the reward first.');
+      return;
+    }
+    
     try {
       setIsProcessing(true);
       const updatedClient = await addCoffee(client.id);
@@ -94,7 +100,7 @@ export function ClientDetails() {
     try {
       setIsProcessing(true);
       await deleteClient(client.id);
-      navigate('/');
+      navigate('/customers');
     } catch (err) {
       console.error('Error deleting client:', err);
       setError('Failed to delete client');

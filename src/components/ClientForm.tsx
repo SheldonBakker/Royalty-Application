@@ -51,7 +51,7 @@ export function ClientForm({ existingClient, onSave }: ClientFormProps) {
       if (onSave) {
         onSave(client);
       } else {
-        navigate('/');
+        navigate(`/clients/${client.id}`);
       }
     } catch (err) {
       console.error('Error saving client:', err);
