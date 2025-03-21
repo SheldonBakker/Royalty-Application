@@ -836,7 +836,15 @@ export function Settings() {
             </button>
             
             <button
-              onClick={refreshPaymentStatus}
+              onClick={async () => {
+                try {
+                  await refreshPaymentStatus();
+                  await loadSettingsData();
+                } catch (err) {
+                  console.error('Error refreshing data:', err);
+                  setError('Failed to refresh data. Please try again.');
+                }
+              }}
               className={`mt-3 inline-flex items-center px-4 py-2 border rounded-lg font-medium shadow-sm text-sm ${
                 darkMode 
                   ? 'border-gray-700 bg-gray-800 text-gray-300 hover:bg-gray-700' 
