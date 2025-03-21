@@ -3,8 +3,15 @@
  */
 
 export function disableDevTools(): void {
+  // Check if we're in production mode
+  // Safely check if import.meta.env exists first
+  const isProduction = 
+    typeof import.meta !== 'undefined' && 
+    import.meta.env && 
+    (import.meta.env.PROD === true || import.meta.env.MODE === 'production');
+  
   // Production-only features
-  if (process.env.NODE_ENV === 'production') {
+  if (isProduction) {
     // Disable console methods
     const noop = (): void => {};
     

@@ -72,7 +72,7 @@ window.addEventListener('unhandledrejection', (event) => {
 })
 
 // Remove development-specific navigation monitoring
-// if (process.env.NODE_ENV !== 'production') {
+// if (!import.meta.env.PROD) {
 //   window.addEventListener('hashchange', (event) => {
 //     console.log('Navigation event (hash):', {
 //       from: event.oldURL,

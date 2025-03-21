@@ -2,6 +2,11 @@ import { defineConfig, PluginOption } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 import obfuscator from 'rollup-plugin-obfuscator'
+import fs from 'fs'
+import dotenv from 'dotenv'
+
+// Load .env file
+const env = dotenv.parse(fs.readFileSync('.env'))
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -138,6 +143,16 @@ export default defineConfig(({ mode }) => {
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || mode),
       // Disable React DevTools in production - using JSON.stringify for proper syntax
       ...(isProduction && { '__REACT_DEVTOOLS_GLOBAL_HOOK__': JSON.stringify({ isDisabled: true }) }),
+      // Include env variables directly in the build
+      'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(env.VITE_SUPABASE_URL),
+      'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(env.VITE_SUPABASE_ANON_KEY),
+      'import.meta.env.VITE_PAYSTACK_PUBLIC_KEY': JSON.stringify(env.VITE_PAYSTACK_PUBLIC_KEY),
+      // Set MODE and PROD values explicitly for production
+      ...(isProduction && {
+        'import.meta.env.MODE': JSON.stringify('production'),
+        'import.meta.env.PROD': 'true',
+        'import.meta.env.DEV': 'false'
+      })
     },
     // Optimize development experience
     optimizeDeps: {

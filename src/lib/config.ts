@@ -1,5 +1,5 @@
 // Configuration file to handle environment variables
-// Works with local .env (Vite) environment variables and Cloudflare environment variables
+// Works with local .env (Vite) environment variables
 
 interface EnvConfig {
   SUPABASE_URL: string;
@@ -7,26 +7,25 @@ interface EnvConfig {
   PAYSTACK_PUBLIC_KEY: string;
 }
 
-// Extend Window interface to include our custom properties
-interface CustomWindow extends Window {
-  __ENV?: {
-    [key: string]: string;
-  };
-  CLOUDFLARE?: boolean;
-}
-
-declare const window: CustomWindow;
-
 // Function to get environment variables
 function getLocalEnv(key: string): string {
-  // First check if we have window.__ENV variables (for Cloudflare production)
-  if (typeof window !== 'undefined' && window.__ENV && window.__ENV[key]) {
-    return window.__ENV[key] || '';
+  // More safely check for import.meta.env existence
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    // Try to get variable from Vite's environment
+    const value = import.meta.env[key];
+    if (value) return value;
   }
   
-  // Fall back to Vite's import.meta.env (for development)
-  if (typeof import.meta !== 'undefined' && import.meta.env) {
-    return import.meta.env[key] || '';
+  // Hardcoded fallbacks for specific keys
+  // These values will be replaced during build in production
+  if (key === 'VITE_SUPABASE_URL') {
+    return 'https://vhcehncbwkpgckyitofa.supabase.co'; // Will be replaced in production build
+  }
+  if (key === 'VITE_SUPABASE_ANON_KEY') {
+    return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoY2VobmNid2twZ2NreWl0b2ZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI0NDkxOTcsImV4cCI6MjA1ODAyNTE5N30.8THs3L9xITSqMBxEV-6cnfdFgmB3LjicO89e3J06P6Q'; // Will be replaced in production build
+  }
+  if (key === 'VITE_PAYSTACK_PUBLIC_KEY') {
+    return 'pk_test_c704520f35f47b15fc077af290346d643c4cf92d'; // Will be replaced in production build
   }
   
   return '';
@@ -46,8 +45,12 @@ function getConfig(): EnvConfig {
   // Debug information
   const debugInfo = false; // Changed to false to disable logs
   
+  // Safely check environment mode
+  const envMode = typeof import.meta !== 'undefined' && import.meta.env ? 
+    (import.meta.env.MODE || 'unknown') : 'production';
+  
   if (debugInfo) {
-    console.log('Environment mode:', process.env.NODE_ENV);
+    console.log('Environment mode:', envMode);
     console.log('VITE_SUPABASE_URL:', getLocalEnv('VITE_SUPABASE_URL').substring(0, 5) + '...');
     console.log('VITE_SUPABASE_ANON_KEY exists:', !!getLocalEnv('VITE_SUPABASE_ANON_KEY'));
   }
