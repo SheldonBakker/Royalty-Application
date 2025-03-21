@@ -4,7 +4,6 @@ import { useAuth } from '../hooks/useAuth';
 import { MFAVerify } from '../components/MFAVerify';
 import { supabase } from '../lib/supabase';
 import { useTheme } from '../hooks/useTheme';
-import Footer from '../components/Footer';
 
 export function Login() {
   const { darkMode } = useTheme();
@@ -131,16 +130,16 @@ export function Login() {
   // Show MFA verification form if required
   if (showMFAVerify) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <div className={`flex items-center justify-center py-12 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
         <MFAVerify onSuccess={handleMFASuccess} onCancel={handleMFACancel} />
       </div>
     );
   }
 
   return (
-    <div className={`relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div className={`relative flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       {/* Decorative elements */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className={`absolute -top-24 -right-24 w-96 h-96 rounded-full ${darkMode ? 'bg-blue-800/10' : 'bg-blue-200/40'} blur-3xl animate-pulse-slow`}></div>
         <div className={`absolute top-1/2 -left-24 w-72 h-72 rounded-full ${darkMode ? 'bg-indigo-800/10' : 'bg-indigo-200/40'} blur-3xl animate-pulse-slower`}></div>
         <div className={`absolute -bottom-24 right-1/3 w-80 h-80 rounded-full ${darkMode ? 'bg-purple-800/10' : 'bg-purple-200/40'} blur-3xl animate-pulse-slow`}></div>
@@ -287,10 +286,6 @@ export function Login() {
             </Link>
           </div>
         </form>
-      </div>
-
-      <div className="absolute w-full bottom-0">
-        <Footer variant="simple" />
       </div>
     </div>
   );

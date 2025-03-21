@@ -23,8 +23,8 @@ export function AppRoutes() {
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route path="/login" element={<AppLayout><Login /></AppLayout>} />
+      <Route path="/register" element={<AppLayout><Register /></AppLayout>} />
       <Route path="/about" element={<AboutUs />} />
 
       {/* Protected routes */}

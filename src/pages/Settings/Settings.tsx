@@ -1,5 +1,4 @@
 import { useState, useEffect, FormEvent, useCallback, useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import { getSettings, updateSettings } from '../../lib/api';
 import { usePayment } from '../../hooks/usePayment';
 import { useAuth } from '../../hooks/useAuth';
@@ -661,17 +660,6 @@ export function Settings() {
 
   return (
     <div className={`container mx-auto px-4 py-6 min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
-      <div className="mb-6">
-        <Link to="/" className={`inline-flex items-center ${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-indigo-600 hover:text-indigo-800'} transition-colors mb-3`}>
-          <svg className="mr-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-          </svg>
-          Back to dashboard
-        </Link>
-        <h1 className={`text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-700 ${darkMode ? 'dark:text-gray-100' : ''}`}>Settings</h1>
-        <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-2 transition-colors duration-200`}>Configure your loyalty program settings</p>
-      </div>
-
       {errorToast}
       {successToast}
 
