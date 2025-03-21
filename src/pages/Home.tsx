@@ -232,7 +232,7 @@ export function Home() {
               </p>
               
               <div className="flex items-end mb-4">
-                <span className={`text-5xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>R2.7</span>
+                <span className={`text-5xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>R2</span>
                 <span className={`ml-2 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>per transaction</span>
               </div>
               

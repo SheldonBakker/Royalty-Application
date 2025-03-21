@@ -17,23 +17,6 @@
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
     
-    <!-- Environment variables initialization -->
-    <script>
-      // Initialize window.__ENV for environment variables
-      window.__ENV = window.__ENV || {};
-      
-      // This will be populated by Cloudflare middleware or Vite during build
-      document.addEventListener('DOMContentLoaded', function() {
-        // For debugging purposes only
-        console.log('Environment check:', {
-          hasCloudflare: !!window.CLOUDFLARE,
-          hasEnvVars: !!window.__ENV,
-          supabaseUrlSet: !!window.__ENV.VITE_SUPABASE_URL,
-          supabaseKeySet: !!window.__ENV.VITE_SUPABASE_ANON_KEY
-        });
-      });
-    </script>
-    
     <!-- SEO meta tags -->
     <meta name="description" content="Loyalty Bean - A customer loyalty program application for coffee shops and cafes">
     <meta name="theme-color" content="#4A2E1D">

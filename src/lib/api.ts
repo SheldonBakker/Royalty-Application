@@ -87,7 +87,7 @@ export async function addCoffee(id: string) {
     ]);
     
     // Check if we have credit balance
-    if ((settings.credit_balance ?? 0) < 2.5) {
+    if ((settings.credit_balance ?? 0) < 2.0) {
       const currentBalance = settings.credit_balance ?? 0;
       throw new Error(`Insufficient credit balance. You have R${currentBalance.toFixed(2)}. Please add more credit to continue.`);
     }
@@ -95,7 +95,7 @@ export async function addCoffee(id: string) {
     // Prepare updates
     const updatedCount = (client.coffees_purchased || 0) + 1;
     const needsReset = checkIfMonthlyResetNeeded(settings.last_reset_date);
-    const newCreditBalance = Math.max(0, (settings.credit_balance ?? 0) - 2.5);
+    const newCreditBalance = Math.max(0, (settings.credit_balance ?? 0) - 2.0);
     
     // Prepare settings update
     const settingsUpdate: Partial<Omit<Settings, 'id' | 'created_at'>> = {
