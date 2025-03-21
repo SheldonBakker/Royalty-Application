@@ -1,6 +1,16 @@
-Coffee Shop Loyalty Application
+# Loyalty Bean
 
-A web application for coffee shops to manage customer loyalty programs, track coffee purchases, and handle free coffee redemptions.
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+![React](https://img.shields.io/badge/React-19-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![Vite](https://img.shields.io/badge/Vite-6-purple)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-blue)
+
+A professional web application for coffee shops to manage customer loyalty programs, track purchases, and handle free coffee redemptions.
+
+## Overview
+
+Loyalty Bean transforms traditional punch card systems into a digital loyalty management platform. The application helps businesses build meaningful connections with customers through an elegant, easy-to-use interface.
 
 ## Features
 
@@ -153,7 +163,7 @@ For local development with full source maps and without minification:
 npm run dev
 ```
 
-## How Environment Variables Work
+## Environment Variables
 
 The application is configured to handle environment variables using Vite's `import.meta.env` to access variables from the `.env` file.
 
@@ -173,7 +183,14 @@ If your application cannot access environment variables, try the following steps
    ```bash
    npm run clean
    rm -rf node_modules/.vite
+   npm install
    ```
+
+## Upcoming Features
+
+- **WhatsApp Integration**: Send loyalty updates, redemption notifications, and special offers directly through WhatsApp
+- **Enhanced Analytics**: More detailed insights into customer loyalty patterns
+- **Multiple Reward Tiers**: Support for various reward levels and special promotions
 
 ## Contributing
 
